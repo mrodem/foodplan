@@ -112,7 +112,12 @@ export default function ShoppingListDetailPage() {
         },
         (payload) => {
           if (payload.eventType === 'INSERT') {
-            setItems((prev) => [...prev, payload.new as ShoppingListItem]);
+            // Only add if not already in list (avoid duplicates from local updates)
+            setItems((prev) => {
+              const exists = prev.some((item) => item.id === payload.new.id);
+              if (exists) return prev;
+              return [...prev, payload.new as ShoppingListItem];
+            });
           } else if (payload.eventType === 'UPDATE') {
             setItems((prev) =>
               prev.map((item) =>
@@ -132,6 +137,13 @@ export default function ShoppingListDetailPage() {
   }
 
   const toggleItemPurchased = async (itemId: string, isPurchased: boolean) => {
+    // Optimistic update
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, is_purchased: !isPurchased } : item
+      )
+    );
+
     await supabase
       .from('shopping_list_items')
       .update({ is_purchased: !isPurchased })
@@ -141,14 +153,22 @@ export default function ShoppingListDetailPage() {
   const addItem = async () => {
     if (!newItemName.trim() || !userId) return;
 
-    await supabase.from('shopping_list_items').insert({
-      list_id: listId,
-      name: newItemName.trim(),
-      quantity: newItemQuantity ? parseFloat(newItemQuantity) : null,
-      unit: newItemUnit.trim() || null,
-      category: newItemCategory,
-      added_by: userId,
-    });
+    const { data: newItem } = await supabase
+      .from('shopping_list_items')
+      .insert({
+        list_id: listId,
+        name: newItemName.trim(),
+        quantity: newItemQuantity ? parseFloat(newItemQuantity) : null,
+        unit: newItemUnit.trim() || null,
+        category: newItemCategory,
+        added_by: userId,
+      })
+      .select()
+      .single();
+
+    if (newItem) {
+      setItems((prev) => [...prev, newItem]);
+    }
 
     setNewItemName('');
     setNewItemQuantity('');
@@ -166,17 +186,28 @@ export default function ShoppingListDetailPage() {
     );
     if (exists) return;
 
-    await supabase.from('shopping_list_items').insert({
-      list_id: listId,
-      name: item.name,
-      quantity: item.default_quantity,
-      unit: item.default_unit,
-      category: item.category,
-      added_by: userId,
-    });
+    const { data: newItem } = await supabase
+      .from('shopping_list_items')
+      .insert({
+        list_id: listId,
+        name: item.name,
+        quantity: item.default_quantity,
+        unit: item.default_unit,
+        category: item.category,
+        added_by: userId,
+      })
+      .select()
+      .single();
+
+    if (newItem) {
+      setItems((prev) => [...prev, newItem]);
+    }
   };
 
   const deleteItem = async (itemId: string) => {
+    // Optimistic update
+    setItems((prev) => prev.filter((item) => item.id !== itemId));
+
     await supabase.from('shopping_list_items').delete().eq('id', itemId);
   };
 

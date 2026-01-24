@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "GroceryApp - Family Meal Planning & Shopping",
-  description: "Plan meals, manage recipes, and shop together as a family",
+  title: "Matplan - Ukesmeny og handleliste for familien",
+  description: "Planlegg middager, del oppskrifter og handle sammen som familie",
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="no">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

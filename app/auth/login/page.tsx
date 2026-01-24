@@ -37,7 +37,7 @@ export default function LoginPage() {
 
   const handleMagicLink = async () => {
     if (!email) {
-      setError('Please enter your email address');
+      setError('Vennligst skriv inn e-postadressen din');
       return;
     }
 
@@ -71,12 +71,12 @@ export default function LoginPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your email</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Sjekk e-posten din</h2>
             <p className="text-gray-500 mb-4">
-              We&apos;ve sent a magic link to <strong>{email}</strong>
+              Vi har sendt en innloggingslenke til <strong>{email}</strong>
             </p>
             <Button variant="ghost" onClick={() => setMagicLinkSent(false)}>
-              Try a different email
+              Prøv en annen e-post
             </Button>
           </CardContent>
         </Card>
@@ -89,28 +89,28 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardContent className="py-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
-            <p className="text-gray-500 mt-1">Sign in to your account</p>
+            <h1 className="text-2xl font-bold text-gray-900">Velkommen tilbake</h1>
+            <p className="text-gray-500 mt-1">Logg inn på kontoen din</p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <Input
               id="email"
               type="email"
-              label="Email"
+              label="E-post"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder="deg@eksempel.no"
               required
             />
 
             <Input
               id="password"
               type="password"
-              label="Password"
+              label="Passord"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your password"
+              placeholder="Ditt passord"
               required
             />
 
@@ -119,7 +119,7 @@ export default function LoginPage() {
             )}
 
             <Button type="submit" className="w-full" isLoading={isLoading}>
-              Sign in
+              Logg inn
             </Button>
           </form>
 
@@ -128,7 +128,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-gray-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">or</span>
+              <span className="px-2 bg-white text-gray-500">eller</span>
             </div>
           </div>
 
@@ -139,13 +139,13 @@ export default function LoginPage() {
             onClick={handleMagicLink}
             disabled={isLoading}
           >
-            Send magic link
+            Send innloggingslenke
           </Button>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Don&apos;t have an account?{' '}
+            Har du ikke konto?{' '}
             <Link href="/auth/signup" className="text-green-600 hover:text-green-700 font-medium">
-              Sign up
+              Registrer deg
             </Link>
           </p>
         </CardContent>

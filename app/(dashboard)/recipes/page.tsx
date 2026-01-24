@@ -29,10 +29,19 @@ export default async function RecipesPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4"
+      >
+        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Oversikt
+      </Link>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Recipes</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Oppskrifter</h1>
         <Link href="/recipes/new">
-          <Button>Add Recipe</Button>
+          <Button>Legg til oppskrift</Button>
         </Link>
       </div>
 
@@ -52,15 +61,15 @@ export default async function RecipesPage() {
                   )}
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">
-                      {recipe.recipe_ingredients.length} ingredients
+                      {recipe.recipe_ingredients.length} ingredienser
                     </span>
                     <span className="text-sm text-gray-500">
-                      {recipe.servings} servings
+                      {recipe.servings} porsjoner
                     </span>
                   </div>
                   {recipe.last_used_at && (
                     <p className="text-xs text-gray-400 mt-2">
-                      Last made: {new Date(recipe.last_used_at).toLocaleDateString()}
+                      Sist laget: {new Date(recipe.last_used_at).toLocaleDateString('nb-NO')}
                     </p>
                   )}
                 </CardContent>
@@ -77,11 +86,11 @@ export default async function RecipesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               }
-              title="No recipes yet"
-              description="Start building your family recipe collection"
+              title="Ingen oppskrifter ennå"
+              description="Begynn å bygge familiens oppskriftssamling"
               action={
                 <Link href="/recipes/new">
-                  <Button>Add your first recipe</Button>
+                  <Button>Legg til din første oppskrift</Button>
                 </Link>
               }
             />

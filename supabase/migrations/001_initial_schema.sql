@@ -1,16 +1,13 @@
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- Households (family groups)
 CREATE TABLE households (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
 -- Link users to households
 CREATE TABLE household_members (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   role TEXT NOT NULL CHECK (role IN ('admin', 'member')) DEFAULT 'member',
@@ -20,7 +17,7 @@ CREATE TABLE household_members (
 
 -- Email invitations
 CREATE TABLE household_invites (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   invited_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -30,7 +27,7 @@ CREATE TABLE household_invites (
 
 -- Recipe database
 CREATE TABLE recipes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
@@ -43,7 +40,7 @@ CREATE TABLE recipes (
 
 -- Recipe ingredients
 CREATE TABLE recipe_ingredients (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   recipe_id UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   quantity DECIMAL,
@@ -53,7 +50,7 @@ CREATE TABLE recipe_ingredients (
 
 -- Weekly meal planning (dinner only)
 CREATE TABLE meal_plans (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   recipe_id UUID NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
@@ -63,7 +60,7 @@ CREATE TABLE meal_plans (
 
 -- Shopping lists
 CREATE TABLE shopping_lists (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('active', 'completed')) DEFAULT 'active',
@@ -72,7 +69,7 @@ CREATE TABLE shopping_lists (
 
 -- Shopping list items (real-time sync)
 CREATE TABLE shopping_list_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   list_id UUID NOT NULL REFERENCES shopping_lists(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   quantity DECIMAL,
@@ -85,7 +82,7 @@ CREATE TABLE shopping_list_items (
 
 -- Custom category ordering per household
 CREATE TABLE category_orders (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   category TEXT NOT NULL CHECK (category IN ('produce', 'dairy', 'meat', 'pantry', 'frozen', 'other')),
   sort_order INTEGER NOT NULL,
@@ -94,7 +91,7 @@ CREATE TABLE category_orders (
 
 -- Common household items (quick-pick when creating lists)
 CREATE TABLE common_items (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   household_id UUID NOT NULL REFERENCES households(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   category TEXT NOT NULL CHECK (category IN ('produce', 'dairy', 'meat', 'pantry', 'frozen', 'other')) DEFAULT 'other',

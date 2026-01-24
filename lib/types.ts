@@ -122,10 +122,10 @@ export const DEFAULT_CATEGORIES: IngredientCategory[] = [
 ];
 
 export const CATEGORY_LABELS: Record<IngredientCategory, string> = {
-  produce: 'Produce',
-  dairy: 'Dairy',
-  meat: 'Meat & Seafood',
-  frozen: 'Frozen',
-  pantry: 'Pantry',
-  other: 'Other',
+  produce: 'Frukt og gr\u00f8nt',
+  dairy: 'Meieri',
+  meat: 'Kj\u00f8tt og fisk',
+  frozen: 'Frysevarer',
+  pantry: 'T\u00f8rrvarer',
+  other: 'Annet',
 };

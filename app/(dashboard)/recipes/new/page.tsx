@@ -51,13 +51,13 @@ export default function NewRecipePage() {
     setError(null);
 
     if (!name.trim()) {
-      setError('Please enter a recipe name');
+      setError('Vennligst skriv inn et oppskriftsnavn');
       return;
     }
 
     const validIngredients = ingredients.filter((i) => i.name.trim());
     if (validIngredients.length === 0) {
-      setError('Please add at least one ingredient');
+      setError('Vennligst legg til minst én ingrediens');
       return;
     }
 
@@ -130,35 +130,35 @@ export default function NewRecipePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Add Recipe</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Legg til oppskrift</h1>
 
       <form onSubmit={handleSubmit}>
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Recipe Details</CardTitle>
+            <CardTitle>Oppskriftsdetaljer</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input
               id="name"
-              label="Recipe Name"
+              label="Navn på oppskrift"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Spaghetti Bolognese"
+              placeholder="f.eks. Spaghetti Bolognese"
               required
             />
 
             <Textarea
               id="description"
-              label="Description (optional)"
+              label="Beskrivelse (valgfritt)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="A brief description of this dish"
+              placeholder="En kort beskrivelse av retten"
               rows={2}
             />
 
             <Input
               id="servings"
-              label="Servings"
+              label="Porsjoner"
               type="number"
               min="1"
               value={servings}
@@ -167,10 +167,10 @@ export default function NewRecipePage() {
 
             <Textarea
               id="instructions"
-              label="Instructions (optional)"
+              label="Fremgangsmåte (valgfritt)"
               value={instructions}
               onChange={(e) => setInstructions(e.target.value)}
-              placeholder="Step-by-step cooking instructions"
+              placeholder="Steg-for-steg beskrivelse"
               rows={4}
             />
           </CardContent>
@@ -178,9 +178,9 @@ export default function NewRecipePage() {
 
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Ingredients</CardTitle>
+            <CardTitle>Ingredienser</CardTitle>
             <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
-              Add Ingredient
+              Legg til ingrediens
             </Button>
           </CardHeader>
           <CardContent>
@@ -189,14 +189,14 @@ export default function NewRecipePage() {
                 <div key={ingredient.id} className="flex gap-2 items-start">
                   <div className="flex-1">
                     <Input
-                      placeholder="Ingredient name"
+                      placeholder="Ingrediensnavn"
                       value={ingredient.name}
                       onChange={(e) => updateIngredient(ingredient.id, 'name', e.target.value)}
                     />
                   </div>
                   <div className="w-20">
                     <Input
-                      placeholder="Qty"
+                      placeholder="Antall"
                       type="number"
                       step="0.1"
                       value={ingredient.quantity}
@@ -205,7 +205,7 @@ export default function NewRecipePage() {
                   </div>
                   <div className="w-24">
                     <Input
-                      placeholder="Unit"
+                      placeholder="Enhet"
                       value={ingredient.unit}
                       onChange={(e) => updateIngredient(ingredient.id, 'unit', e.target.value)}
                     />
@@ -241,10 +241,10 @@ export default function NewRecipePage() {
 
         <div className="flex gap-3">
           <Button type="button" variant="outline" onClick={() => router.back()}>
-            Cancel
+            Avbryt
           </Button>
           <Button type="submit" isLoading={isLoading}>
-            Save Recipe
+            Lagre oppskrift
           </Button>
         </div>
       </form>

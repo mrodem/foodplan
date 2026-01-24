@@ -52,24 +52,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Oversikt</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <StatCard
-          title="Recipes"
+          title="Oppskrifter"
           value={recipeCount || 0}
           href="/recipes"
           icon={<BookIcon />}
         />
         <StatCard
-          title="This Week's Meals"
+          title="Denne ukens middager"
           value={mealPlans?.length || 0}
-          subtitle="planned"
+          subtitle="planlagt"
           href="/meal-plan"
           icon={<CalendarIcon />}
         />
         <StatCard
-          title="Active Lists"
+          title="Aktive lister"
           value={shoppingLists?.length || 0}
           href="/shopping"
           icon={<CartIcon />}
@@ -79,9 +79,9 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>This Week</CardTitle>
+            <CardTitle>Denne uken</CardTitle>
             <Link href="/meal-plan" className="text-sm text-green-600 hover:text-green-700">
-              View all
+              Se alle
             </Link>
           </CardHeader>
           <CardContent>
@@ -99,10 +99,10 @@ export default async function DashboardPage() {
                     >
                       <span className={`text-sm font-medium ${isToday ? 'text-green-700' : 'text-gray-600'}`}>
                         {formatDate(date)}
-                        {isToday && <span className="ml-2 text-xs">(Today)</span>}
+                        {isToday && <span className="ml-2 text-xs">(I dag)</span>}
                       </span>
                       <span className={`text-sm ${plan ? 'text-gray-900' : 'text-gray-400'}`}>
-                        {plan ? plan.recipes.name : 'No meal planned'}
+                        {plan ? plan.recipes.name : 'Ingen middag planlagt'}
                       </span>
                     </div>
                   );
@@ -110,12 +110,12 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="text-center py-6">
-                <p className="text-gray-500 mb-4">No meals planned this week</p>
+                <p className="text-gray-500 mb-4">Ingen middager planlagt denne uken</p>
                 <Link
                   href="/meal-plan"
                   className="text-green-600 hover:text-green-700 font-medium"
                 >
-                  Plan your week
+                  Planlegg uken
                 </Link>
               </div>
             )}
@@ -124,9 +124,9 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Active Shopping Lists</CardTitle>
+            <CardTitle>Aktive handlelister</CardTitle>
             <Link href="/shopping" className="text-sm text-green-600 hover:text-green-700">
-              View all
+              Se alle
             </Link>
           </CardHeader>
           <CardContent>
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium text-gray-900">{list.name}</span>
                         <span className="text-sm text-gray-500">
-                          {purchased}/{total} items
+                          {purchased}/{total} varer
                         </span>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -160,12 +160,12 @@ export default async function DashboardPage() {
               </div>
             ) : (
               <div className="text-center py-6">
-                <p className="text-gray-500 mb-4">No active shopping lists</p>
+                <p className="text-gray-500 mb-4">Ingen aktive handlelister</p>
                 <Link
                   href="/shopping/new"
                   className="text-green-600 hover:text-green-700 font-medium"
                 >
-                  Create a list
+                  Opprett en liste
                 </Link>
               </div>
             )}

@@ -19,12 +19,12 @@ export default function SignUpPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('Passordene er ikke like');
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Passordet må være minst 6 tegn');
       return;
     }
 
@@ -58,12 +58,12 @@ export default function SignUpPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your email</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Sjekk e-posten din</h2>
             <p className="text-gray-500 mb-4">
-              We&apos;ve sent a confirmation link to <strong>{email}</strong>
+              Vi har sendt en bekreftelseslenke til <strong>{email}</strong>
             </p>
             <p className="text-sm text-gray-400">
-              Click the link in your email to activate your account.
+              Klikk på lenken i e-posten for å aktivere kontoen din.
             </p>
           </CardContent>
         </Card>
@@ -76,38 +76,38 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md">
         <CardContent className="py-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">Create an account</h1>
-            <p className="text-gray-500 mt-1">Start managing your family groceries</p>
+            <h1 className="text-2xl font-bold text-gray-900">Opprett en konto</h1>
+            <p className="text-gray-500 mt-1">Start med å planlegge familiens måltider</p>
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-4">
             <Input
               id="email"
               type="email"
-              label="Email"
+              label="E-post"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder="deg@eksempel.no"
               required
             />
 
             <Input
               id="password"
               type="password"
-              label="Password"
+              label="Passord"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
+              placeholder="Minst 6 tegn"
               required
             />
 
             <Input
               id="confirmPassword"
               type="password"
-              label="Confirm password"
+              label="Bekreft passord"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
+              placeholder="Bekreft passordet ditt"
               required
             />
 
@@ -116,14 +116,14 @@ export default function SignUpPage() {
             )}
 
             <Button type="submit" className="w-full" isLoading={isLoading}>
-              Create account
+              Opprett konto
             </Button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Already have an account?{' '}
+            Har du allerede en konto?{' '}
             <Link href="/auth/login" className="text-green-600 hover:text-green-700 font-medium">
-              Sign in
+              Logg inn
             </Link>
           </p>
         </CardContent>

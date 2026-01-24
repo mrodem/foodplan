@@ -14,73 +14,73 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
       <div className="max-w-6xl mx-auto px-4 py-12">
         <nav className="flex items-center justify-between mb-16">
-          <span className="text-2xl font-bold text-green-600">GroceryApp</span>
+          <span className="text-2xl font-bold text-green-600">Matplan</span>
           <div className="flex gap-4">
             <Link
               href="/auth/login"
               className="px-4 py-2 text-green-700 hover:text-green-800 font-medium"
             >
-              Sign in
+              Logg inn
             </Link>
             <Link
               href="/auth/signup"
               className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
             >
-              Get started
+              Kom i gang
             </Link>
           </div>
         </nav>
 
         <div className="text-center max-w-3xl mx-auto">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            Family meal planning made simple
+            Enkel middagsplanlegging for familien
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Plan your meals, share recipes, and shop together. Real-time shopping lists
-            keep everyone in sync at the store.
+            Planlegg ukens middager, del oppskrifter og handle sammen. Sanntidssynkroniserte
+            handlelister holder alle oppdatert i butikken.
           </p>
           <Link
             href="/auth/signup"
             className="inline-block px-8 py-4 bg-green-600 text-white text-lg rounded-xl hover:bg-green-700 font-medium shadow-lg hover:shadow-xl transition-all"
           >
-            Start for free
+            Start gratis
           </Link>
         </div>
 
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard
             icon={<RecipeIcon />}
-            title="Recipe Database"
-            description="Build your family's recipe collection with ingredients organized by store aisle."
+            title="Oppskriftssamling"
+            description="Bygg familiens oppskriftssamling med ingredienser organisert etter butikkhylle."
           />
           <FeatureCard
             icon={<CalendarIcon />}
-            title="Meal Planning"
-            description="Plan your week's dinners with an easy calendar view. See what you haven't had in a while."
+            title="Ukesmeny"
+            description="Planlegg ukens middager med en enkel kalendervisning. Se hva dere ikke har laget på lenge."
           />
           <FeatureCard
             icon={<CartIcon />}
-            title="Smart Shopping"
-            description="Generate shopping lists from your meal plan. Check off items in real-time together."
+            title="Smart handletur"
+            description="Generer handlelister fra ukesmenyen. Huk av varer i sanntid sammen."
           />
         </div>
 
         <div className="mt-24 bg-white rounded-2xl p-8 shadow-lg">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            How it works
+            Slik fungerer det
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <Step number={1} title="Create household" description="Set up your family group and invite members" />
-            <Step number={2} title="Add recipes" description="Build your recipe collection with ingredients" />
-            <Step number={3} title="Plan meals" description="Assign dinners to days of the week" />
-            <Step number={4} title="Shop together" description="Generate lists and check off items in real-time" />
+            <Step number={1} title="Opprett husstand" description="Sett opp familiegruppen og inviter medlemmer" />
+            <Step number={2} title="Legg til oppskrifter" description="Bygg oppskriftssamlingen med ingredienser" />
+            <Step number={3} title="Planlegg middager" description="Fordel middager utover ukedagene" />
+            <Step number={4} title="Handle sammen" description="Generer lister og huk av varer i sanntid" />
           </div>
         </div>
       </div>
 
       <footer className="border-t border-green-200 mt-24 py-8">
         <div className="max-w-6xl mx-auto px-4 text-center text-gray-500">
-          <p>Built with Next.js, Supabase, and Tailwind CSS</p>
+          <p>Bygget med Next.js, Supabase og Tailwind CSS</p>
         </div>
       </footer>
     </div>

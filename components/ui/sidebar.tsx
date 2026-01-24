@@ -19,12 +19,12 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-  { name: 'Recipes', href: '/recipes', icon: BookIcon },
-  { name: 'Meal Plan', href: '/meal-plan', icon: CalendarIcon },
-  { name: 'Shopping', href: '/shopping', icon: CartIcon },
-  { name: 'Common Items', href: '/common-items', icon: StarIcon },
-  { name: 'Settings', href: '/settings', icon: SettingsIcon },
+  { name: 'Oversikt', href: '/dashboard', icon: HomeIcon },
+  { name: 'Oppskrifter', href: '/recipes', icon: BookIcon },
+  { name: 'Ukesmeny', href: '/meal-plan', icon: CalendarIcon },
+  { name: 'Handleliste', href: '/shopping', icon: CartIcon },
+  { name: 'Faste varer', href: '/common-items', icon: StarIcon },
+  { name: 'Innstillinger', href: '/settings', icon: SettingsIcon },
 ];
 
 export function Sidebar({ userEmail, householdName, needsHousehold }: SidebarProps) {
@@ -57,7 +57,7 @@ export function Sidebar({ userEmail, householdName, needsHousehold }: SidebarPro
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="text-lg font-semibold text-green-600">GroceryApp</span>
+          <span className="text-lg font-semibold text-green-600">Matplan</span>
           <div className="w-6" />
         </div>
       </div>
@@ -120,7 +120,7 @@ function SidebarContent({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center h-16 px-4 border-b border-gray-200">
-        <span className="text-xl font-bold text-green-600">GroceryApp</span>
+        <span className="text-xl font-bold text-green-600">Matplan</span>
         {onClose && (
           <button onClick={onClose} className="ml-auto text-gray-500 lg:hidden">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,16 +132,16 @@ function SidebarContent({
 
       {householdName && (
         <div className="px-4 py-3 bg-green-50 border-b border-green-100">
-          <p className="text-xs text-green-600 font-medium">Household</p>
+          <p className="text-xs text-green-600 font-medium">Husstand</p>
           <p className="text-sm font-semibold text-green-900 truncate">{householdName}</p>
         </div>
       )}
 
       {needsHousehold && (
         <div className="px-4 py-3 bg-yellow-50 border-b border-yellow-100">
-          <p className="text-xs text-yellow-600 font-medium">Setup Required</p>
+          <p className="text-xs text-yellow-600 font-medium">Oppsett kreves</p>
           <Link href="/settings" className="text-sm text-yellow-800 hover:underline">
-            Create or join a household
+            Opprett eller bli med i en husstand
           </Link>
         </div>
       )}
@@ -175,7 +175,7 @@ function SidebarContent({
           className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
         >
           <LogoutIcon className="mr-3 h-5 w-5 text-gray-400" />
-          Sign out
+          Logg ut
         </button>
       </div>
     </div>
