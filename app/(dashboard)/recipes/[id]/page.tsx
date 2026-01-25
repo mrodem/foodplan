@@ -90,13 +90,13 @@ export default function RecipeDetailPage() {
     setError(null);
 
     if (!name.trim()) {
-      setError('Please enter a recipe name');
+      setError('Vennligst skriv inn et oppskriftsnavn');
       return;
     }
 
     const validIngredients = ingredients.filter((i) => i.name.trim());
     if (validIngredients.length === 0) {
-      setError('Please add at least one ingredient');
+      setError('Vennligst legg til minst én ingrediens');
       return;
     }
 
@@ -180,15 +180,15 @@ export default function RecipeDetailPage() {
           <svg className="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          Back to Recipes
+          Tilbake til oppskrifter
         </button>
         {!isEditing && (
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setIsEditing(true)}>
-              Edit
+              Rediger
             </Button>
             <Button variant="danger" onClick={() => setShowDeleteConfirm(true)}>
-              Delete
+              Slett
             </Button>
           </div>
         )}
@@ -198,12 +198,12 @@ export default function RecipeDetailPage() {
         <>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Recipe Details</CardTitle>
+              <CardTitle>Oppskriftsdetaljer</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Input
                 id="name"
-                label="Recipe Name"
+                label="Navn på oppskrift"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -211,7 +211,7 @@ export default function RecipeDetailPage() {
 
               <Textarea
                 id="description"
-                label="Description (optional)"
+                label="Beskrivelse (valgfritt)"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
@@ -219,7 +219,7 @@ export default function RecipeDetailPage() {
 
               <Input
                 id="servings"
-                label="Servings"
+                label="Porsjoner"
                 type="number"
                 min="1"
                 value={servings}
@@ -228,7 +228,7 @@ export default function RecipeDetailPage() {
 
               <Textarea
                 id="instructions"
-                label="Instructions (optional)"
+                label="Fremgangsmåte (valgfritt)"
                 value={instructions}
                 onChange={(e) => setInstructions(e.target.value)}
                 rows={4}
@@ -238,9 +238,9 @@ export default function RecipeDetailPage() {
 
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Ingredients</CardTitle>
+              <CardTitle>Ingredienser</CardTitle>
               <Button type="button" variant="outline" size="sm" onClick={addIngredient}>
-                Add Ingredient
+                Legg til ingrediens
               </Button>
             </CardHeader>
             <CardContent>
@@ -249,14 +249,14 @@ export default function RecipeDetailPage() {
                   <div key={ingredient.id} className="flex gap-2 items-start">
                     <div className="flex-1">
                       <Input
-                        placeholder="Ingredient name"
+                        placeholder="Ingrediensnavn"
                         value={ingredient.name}
                         onChange={(e) => updateIngredient(ingredient.id, 'name', e.target.value)}
                       />
                     </div>
                     <div className="w-20">
                       <Input
-                        placeholder="Qty"
+                        placeholder="Antall"
                         type="number"
                         step="0.1"
                         value={ingredient.quantity}
@@ -265,7 +265,7 @@ export default function RecipeDetailPage() {
                     </div>
                     <div className="w-24">
                       <Input
-                        placeholder="Unit"
+                        placeholder="Enhet"
                         value={ingredient.unit}
                         onChange={(e) => updateIngredient(ingredient.id, 'unit', e.target.value)}
                       />
@@ -306,10 +306,10 @@ export default function RecipeDetailPage() {
                 loadRecipe();
               }}
             >
-              Cancel
+              Avbryt
             </Button>
             <Button onClick={handleSave} isLoading={isSaving}>
-              Save Changes
+              Lagre endringer
             </Button>
           </div>
         </>
@@ -322,9 +322,9 @@ export default function RecipeDetailPage() {
                 <p className="text-gray-600 mb-4">{recipe.description}</p>
               )}
               <div className="flex gap-4 text-sm text-gray-500">
-                <span>{recipe.servings} servings</span>
+                <span>{recipe.servings} porsjoner</span>
                 {recipe.last_used_at && (
-                  <span>Last made: {new Date(recipe.last_used_at).toLocaleDateString()}</span>
+                  <span>Sist laget: {new Date(recipe.last_used_at).toLocaleDateString('nb-NO')}</span>
                 )}
               </div>
             </CardContent>
@@ -332,7 +332,7 @@ export default function RecipeDetailPage() {
 
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Ingredients</CardTitle>
+              <CardTitle>Ingredienser</CardTitle>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
@@ -353,7 +353,7 @@ export default function RecipeDetailPage() {
           {recipe.instructions && (
             <Card>
               <CardHeader>
-                <CardTitle>Instructions</CardTitle>
+                <CardTitle>Fremgangsmåte</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-700 whitespace-pre-wrap">{recipe.instructions}</p>
@@ -366,17 +366,17 @@ export default function RecipeDetailPage() {
       <Modal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
-        title="Delete Recipe"
+        title="Slett oppskrift"
       >
         <p className="text-gray-600 mb-4">
-          Are you sure you want to delete &quot;{recipe.name}&quot;? This action cannot be undone.
+          Er du sikker på at du vil slette &quot;{recipe.name}&quot;? Dette kan ikke angres.
         </p>
         <div className="flex gap-3 justify-end">
           <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-            Cancel
+            Avbryt
           </Button>
           <Button variant="danger" onClick={handleDelete}>
-            Delete
+            Slett
           </Button>
         </div>
       </Modal>

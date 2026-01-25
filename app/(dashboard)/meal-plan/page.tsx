@@ -151,10 +151,10 @@ export default function MealPlanPage() {
         <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        Dashboard
+        Oversikt
       </Link>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Meal Plan</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Ukesmeny</h1>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
@@ -171,7 +171,7 @@ export default function MealPlanPage() {
             onClick={() => setWeekOffset(0)}
             disabled={weekOffset === 0}
           >
-            Today
+            I dag
           </Button>
           <Button
             variant="outline"
@@ -186,7 +186,7 @@ export default function MealPlanPage() {
       </div>
 
       <p className="text-gray-500 mb-4">
-        Week of {formatDate(weekDates[0])} - {formatDate(weekDates[6])}
+        Uke fra {formatDate(weekDates[0])} - {formatDate(weekDates[6])}
       </p>
 
       <Card>
@@ -206,8 +206,8 @@ export default function MealPlanPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className={`w-20 ${today ? 'text-green-700' : past ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <p className="font-medium">{date.toLocaleDateString('en-US', { weekday: 'short' })}</p>
-                      <p className="text-sm">{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                      <p className="font-medium">{date.toLocaleDateString('nb-NO', { weekday: 'short' })}</p>
+                      <p className="text-sm">{date.toLocaleDateString('nb-NO', { month: 'short', day: 'numeric' })}</p>
                     </div>
                     <div>
                       {meal ? (
@@ -215,7 +215,7 @@ export default function MealPlanPage() {
                           {meal.recipes?.name}
                         </p>
                       ) : (
-                        <p className="text-gray-400 italic">No meal planned</p>
+                        <p className="text-gray-400 italic">Ingen middag planlagt</p>
                       )}
                     </div>
                   </div>
@@ -235,7 +235,7 @@ export default function MealPlanPage() {
                       size="sm"
                       onClick={() => handleDateClick(date)}
                     >
-                      {meal ? 'Change' : 'Add'}
+                      {meal ? 'Endre' : 'Legg til'}
                     </Button>
                   </div>
                 </div>
@@ -252,20 +252,20 @@ export default function MealPlanPage() {
           setShowRecipePicker(false);
           setSelectedDate(null);
         }}
-        title={selectedDate ? `Pick a meal for ${formatDate(selectedDate)}` : 'Pick a meal'}
+        title={selectedDate ? `Velg middag for ${formatDate(selectedDate)}` : 'Velg middag'}
         className="max-w-lg"
       >
         {recipes.length > 0 ? (
           <>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-500">{recipes.length} recipes</span>
+              <span className="text-sm text-gray-500">{recipes.length} oppskrifter</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'name' | 'least_used')}
                 className="text-sm border border-gray-300 rounded-lg px-2 py-1"
               >
-                <option value="least_used">Least recently made</option>
-                <option value="name">Alphabetical</option>
+                <option value="least_used">Ikke laget på lengst</option>
+                <option value="name">Alfabetisk</option>
               </select>
             </div>
             <div className="max-h-80 overflow-y-auto space-y-2">
@@ -278,8 +278,8 @@ export default function MealPlanPage() {
                   <p className="font-medium text-gray-900">{recipe.name}</p>
                   <p className="text-sm text-gray-500">
                     {recipe.last_used_at
-                      ? `Last made: ${new Date(recipe.last_used_at).toLocaleDateString()}`
-                      : 'Never made'}
+                      ? `Sist laget: ${new Date(recipe.last_used_at).toLocaleDateString('nb-NO')}`
+                      : 'Aldri laget'}
                   </p>
                 </button>
               ))}
@@ -287,11 +287,11 @@ export default function MealPlanPage() {
           </>
         ) : (
           <EmptyState
-            title="No recipes yet"
-            description="Add some recipes first to start planning meals"
+            title="Ingen oppskrifter ennå"
+            description="Legg til noen oppskrifter først for å planlegge middager"
             action={
               <Button onClick={() => (window.location.href = '/recipes/new')}>
-                Add Recipe
+                Legg til oppskrift
               </Button>
             }
           />

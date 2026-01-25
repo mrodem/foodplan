@@ -60,7 +60,7 @@ export default function SettingsPage() {
         const memberEmails = await Promise.all(
           membersData.map(async (m) => {
             const { data: userData } = await supabase.auth.admin.getUserById(m.user_id);
-            return { ...m, email: userData?.user?.email || 'Unknown' };
+            return { ...m, email: userData?.user?.email || 'Ukjent' };
           })
         );
         setMembers(memberEmails);
@@ -105,7 +105,7 @@ export default function SettingsPage() {
 
   async function createHousehold() {
     if (!householdName.trim()) {
-      setError('Please enter a household name');
+      setError('Vennligst skriv inn et husstandsnavn');
       return;
     }
 
@@ -175,7 +175,7 @@ export default function SettingsPage() {
 
   async function sendInvite() {
     if (!inviteEmail.trim()) {
-      setError('Please enter an email address');
+      setError('Vennligst skriv inn en e-postadresse');
       return;
     }
 
@@ -242,7 +242,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Innstillinger</h1>
         <div className="animate-pulse space-y-4">
           <div className="h-32 bg-gray-200 rounded-xl" />
           <div className="h-48 bg-gray-200 rounded-xl" />
@@ -253,13 +253,13 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Innstillinger</h1>
 
       {/* Pending invites */}
       {pendingInvites.length > 0 && !household && (
         <Card className="mb-6 border-green-200 bg-green-50">
           <CardHeader>
-            <CardTitle>Pending Invitations</CardTitle>
+            <CardTitle>Ventende invitasjoner</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -271,7 +271,7 @@ export default function SettingsPage() {
                     onClick={() => acceptInvite(invite.id, invite.household_id)}
                     isLoading={actionLoading}
                   >
-                    Accept
+                    Godta
                   </Button>
                 </div>
               ))}
@@ -283,7 +283,7 @@ export default function SettingsPage() {
       {/* Household section */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Household</CardTitle>
+          <CardTitle>Husstand</CardTitle>
         </CardHeader>
         <CardContent>
           {household ? (
@@ -291,20 +291,20 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="font-semibold text-lg">{household.name}</p>
-                  <p className="text-sm text-gray-500">{members.length} member(s)</p>
+                  <p className="text-sm text-gray-500">{members.length} medlem(mer)</p>
                 </div>
                 {isAdmin && (
-                  <Badge variant="success">Admin</Badge>
+                  <Badge variant="success">Administrator</Badge>
                 )}
               </div>
 
               <div className="border-t pt-4">
-                <h4 className="font-medium mb-3">Members</h4>
+                <h4 className="font-medium mb-3">Medlemmer</h4>
                 <div className="space-y-2">
                   {members.map((member) => (
                     <div key={member.id} className="flex items-center justify-between py-2">
                       <span className="text-sm">{member.email}</span>
-                      <Badge>{member.role}</Badge>
+                      <Badge>{member.role === 'admin' ? 'Admin' : 'Medlem'}</Badge>
                     </div>
                   ))}
                 </div>
@@ -314,9 +314,9 @@ export default function SettingsPage() {
                 <>
                   <div className="border-t pt-4 mt-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-medium">Pending Invites</h4>
+                      <h4 className="font-medium">Ventende invitasjoner</h4>
                       <Button size="sm" variant="outline" onClick={() => setShowInvite(true)}>
-                        Invite Member
+                        Inviter medlem
                       </Button>
                     </div>
                     {invites.length > 0 ? (
@@ -328,13 +328,13 @@ export default function SettingsPage() {
                               onClick={() => cancelInvite(invite.id)}
                               className="text-sm text-red-600 hover:text-red-700"
                             >
-                              Cancel
+                              Avbryt
                             </button>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-sm text-gray-500">No pending invites</p>
+                      <p className="text-sm text-gray-500">Ingen ventende invitasjoner</p>
                     )}
                   </div>
                 </>
@@ -343,10 +343,10 @@ export default function SettingsPage() {
           ) : (
             <div className="text-center py-6">
               <p className="text-gray-500 mb-4">
-                You&apos;re not part of a household yet. Create one or wait for an invite.
+                Du er ikke del av en husstand ennå. Opprett en eller vent på en invitasjon.
               </p>
               <Button onClick={() => setShowCreateHousehold(true)}>
-                Create Household
+                Opprett husstand
               </Button>
             </div>
           )}
@@ -357,11 +357,11 @@ export default function SettingsPage() {
       {household && (
         <Card>
           <CardHeader>
-            <CardTitle>Category Order</CardTitle>
+            <CardTitle>Kategorirekkefølge</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-500 mb-4">
-              Reorder categories to match your store layout. Shopping lists will be grouped in this order.
+              Endre rekkefølgen på kategoriene så de matcher butikken din. Handlelister grupperes i denne rekkefølgen.
             </p>
             <div className="space-y-2">
               {categoryOrders.map((order, index) => (
@@ -401,22 +401,22 @@ export default function SettingsPage() {
       <Modal
         isOpen={showCreateHousehold}
         onClose={() => setShowCreateHousehold(false)}
-        title="Create Household"
+        title="Opprett husstand"
       >
         <div className="space-y-4">
           <Input
-            label="Household Name"
+            label="Husstandsnavn"
             value={householdName}
             onChange={(e) => setHouseholdName(e.target.value)}
-            placeholder="e.g., The Smiths"
+            placeholder="f.eks. Familien Hansen"
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-3 justify-end">
             <Button variant="outline" onClick={() => setShowCreateHousehold(false)}>
-              Cancel
+              Avbryt
             </Button>
             <Button onClick={createHousehold} isLoading={actionLoading}>
-              Create
+              Opprett
             </Button>
           </div>
         </div>
@@ -426,26 +426,26 @@ export default function SettingsPage() {
       <Modal
         isOpen={showInvite}
         onClose={() => setShowInvite(false)}
-        title="Invite Member"
+        title="Inviter medlem"
       >
         <div className="space-y-4">
           <Input
-            label="Email Address"
+            label="E-postadresse"
             type="email"
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
-            placeholder="family@example.com"
+            placeholder="familie@eksempel.no"
           />
           <p className="text-sm text-gray-500">
-            They&apos;ll see the invite when they sign up or log in with this email.
+            De vil se invitasjonen når de registrerer seg eller logger inn med denne e-posten.
           </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex gap-3 justify-end">
             <Button variant="outline" onClick={() => setShowInvite(false)}>
-              Cancel
+              Avbryt
             </Button>
             <Button onClick={sendInvite} isLoading={actionLoading}>
-              Send Invite
+              Send invitasjon
             </Button>
           </div>
         </div>

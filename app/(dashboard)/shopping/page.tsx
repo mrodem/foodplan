@@ -39,18 +39,18 @@ export default async function ShoppingListsPage() {
         <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        Dashboard
+        Oversikt
       </Link>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Shopping Lists</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Handlelister</h1>
         <Link href="/shopping/new">
-          <Button>New List</Button>
+          <Button>Ny liste</Button>
         </Link>
       </div>
 
       {activeLists.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Active Lists</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Aktive lister</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {activeLists.map((list) => {
               const total = list.shopping_list_items.length;
@@ -65,10 +65,10 @@ export default async function ShoppingListsPage() {
                         <div>
                           <h3 className="font-semibold text-gray-900">{list.name}</h3>
                           <p className="text-sm text-gray-500">
-                            {purchased}/{total} items checked
+                            {purchased}/{total} varer huket av
                           </p>
                         </div>
-                        <Badge variant="success">Active</Badge>
+                        <Badge variant="success">Aktiv</Badge>
                       </div>
                       <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
@@ -77,7 +77,7 @@ export default async function ShoppingListsPage() {
                         />
                       </div>
                       <p className="text-xs text-gray-400 mt-3">
-                        Created {new Date(list.created_at).toLocaleDateString()}
+                        Opprettet {new Date(list.created_at).toLocaleDateString('nb-NO')}
                       </p>
                     </CardContent>
                   </Card>
@@ -90,7 +90,7 @@ export default async function ShoppingListsPage() {
 
       {completedLists.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-700 mb-4">Completed Lists</h2>
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">Fullførte lister</h2>
           <div className="space-y-2">
             {completedLists.slice(0, 5).map((list) => (
               <Link key={list.id} href={`/shopping/${list.id}`}>
@@ -98,11 +98,11 @@ export default async function ShoppingListsPage() {
                   <div>
                     <span className="font-medium text-gray-700">{list.name}</span>
                     <span className="ml-3 text-sm text-gray-400">
-                      {list.shopping_list_items.length} items
+                      {list.shopping_list_items.length} varer
                     </span>
                   </div>
                   <span className="text-sm text-gray-400">
-                    {new Date(list.created_at).toLocaleDateString()}
+                    {new Date(list.created_at).toLocaleDateString('nb-NO')}
                   </span>
                 </div>
               </Link>
@@ -120,11 +120,11 @@ export default async function ShoppingListsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               }
-              title="No shopping lists yet"
-              description="Create a list from your meal plan or start fresh"
+              title="Ingen handlelister ennå"
+              description="Opprett en liste fra ukesmenyen eller start fra bunnen"
               action={
                 <Link href="/shopping/new">
-                  <Button>Create your first list</Button>
+                  <Button>Opprett din første liste</Button>
                 </Link>
               }
             />

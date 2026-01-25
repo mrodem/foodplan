@@ -84,7 +84,7 @@ export default function NewShoppingListPage() {
     }
 
     // Auto-generate list name based on date
-    setListName(`Shopping ${new Date().toLocaleDateString()}`);
+    setListName(`Handling ${new Date().toLocaleDateString('nb-NO')}`);
     setLoading(false);
   }
 
@@ -106,13 +106,18 @@ export default function NewShoppingListPage() {
       if (meal?.recipes?.recipe_ingredients) {
         meal.recipes.recipe_ingredients.forEach((ingredient) => {
           const key = `${ingredient.name.toLowerCase()}-${ingredient.category}`;
+          const ingredientQty = ingredient.quantity ?? 1;
+
           if (items.has(key)) {
             const existing = items.get(key)!;
-            if (existing.quantity && ingredient.quantity) {
-              existing.quantity = (existing.quantity as number) + (ingredient.quantity as number);
+            const existingQty = existing.quantity ?? 1;
+            existing.quantity = existingQty + ingredientQty;
+            // Keep the unit from the first item, or use the new one if first was empty
+            if (!existing.unit && ingredient.unit) {
+              existing.unit = ingredient.unit;
             }
           } else {
-            items.set(key, { ...ingredient });
+            items.set(key, { ...ingredient, quantity: ingredientQty });
           }
         });
       }
@@ -124,18 +129,28 @@ export default function NewShoppingListPage() {
 
   const addCommonItem = (item: CommonItem) => {
     const key = `${item.name.toLowerCase()}-${item.category}`;
-    if (!generatedItems.has(key)) {
-      const newItems = new Map(generatedItems);
+    const newItems = new Map(generatedItems);
+    const itemQty = item.default_quantity ?? 1;
+
+    if (newItems.has(key)) {
+      // Aggregate quantities
+      const existing = newItems.get(key)!;
+      const existingQty = existing.quantity ?? 1;
+      existing.quantity = existingQty + itemQty;
+      if (!existing.unit && item.default_unit) {
+        existing.unit = item.default_unit;
+      }
+    } else {
       newItems.set(key, {
         id: `common-${item.id}`,
         recipe_id: '',
         name: item.name,
-        quantity: item.default_quantity,
+        quantity: itemQty,
         unit: item.default_unit,
         category: item.category,
       });
-      setGeneratedItems(newItems);
     }
+    setGeneratedItems(newItems);
   };
 
   const removeItem = (key: string) => {
@@ -154,7 +169,7 @@ export default function NewShoppingListPage() {
       .from('shopping_lists')
       .insert({
         household_id: householdId,
-        name: listName || `Shopping ${new Date().toLocaleDateString()}`,
+        name: listName || `Handling ${new Date().toLocaleDateString('nb-NO')}`,
       })
       .select()
       .single();
@@ -199,7 +214,7 @@ export default function NewShoppingListPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Create Shopping List</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Opprett handleliste</h1>
 
       {/* Progress indicator */}
       <div className="flex items-center mb-8">
@@ -224,16 +239,16 @@ export default function NewShoppingListPage() {
       {step === 'meals' && (
         <div>
           <Input
-            label="List Name"
+            label="Listenavn"
             value={listName}
             onChange={(e) => setListName(e.target.value)}
-            placeholder="e.g., Weekly shopping"
+            placeholder="f.eks. Ukeshandling"
             className="mb-6"
           />
 
           <Card>
             <CardHeader>
-              <CardTitle>Select Meals to Shop For</CardTitle>
+              <CardTitle>Velg middager å handle for</CardTitle>
             </CardHeader>
             <CardContent>
               {mealPlans.length > 0 ? (
@@ -260,14 +275,14 @@ export default function NewShoppingListPage() {
                         </div>
                       </div>
                       <span className="text-sm text-gray-400">
-                        {plan.recipes.recipe_ingredients?.length || 0} items
+                        {plan.recipes.recipe_ingredients?.length || 0} varer
                       </span>
                     </label>
                   ))}
                 </div>
               ) : (
                 <p className="text-gray-500 text-center py-4">
-                  No upcoming meals planned. You can still create a list and add items manually.
+                  Ingen kommende middager planlagt. Du kan fortsatt opprette en liste og legge til varer manuelt.
                 </p>
               )}
             </CardContent>
@@ -275,7 +290,7 @@ export default function NewShoppingListPage() {
 
           <div className="flex gap-3 mt-6">
             <Button variant="outline" onClick={() => router.back()}>
-              Cancel
+              Avbryt
             </Button>
             <Button
               onClick={() => {
@@ -286,7 +301,7 @@ export default function NewShoppingListPage() {
                 }
               }}
             >
-              {selectedMeals.size > 0 ? `Generate from ${selectedMeals.size} meal(s)` : 'Skip to Add Items'}
+              {selectedMeals.size > 0 ? `Generer fra ${selectedMeals.size} middag(er)` : 'Hopp til legg til varer'}
             </Button>
           </div>
         </div>
@@ -296,7 +311,7 @@ export default function NewShoppingListPage() {
         <div>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Review Generated List</CardTitle>
+              <CardTitle>Se over generert liste</CardTitle>
             </CardHeader>
             <CardContent>
               {sortedCategories.map((category) => {
@@ -313,9 +328,7 @@ export default function NewShoppingListPage() {
                           className="flex items-center justify-between py-1 px-2 rounded hover:bg-gray-50"
                         >
                           <span className="text-gray-900">
-                            {item.quantity && `${item.quantity} `}
-                            {item.unit && `${item.unit} `}
-                            {item.name}
+                            {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
                           </span>
                           <button
                             onClick={() => removeItem(key)}
@@ -332,20 +345,20 @@ export default function NewShoppingListPage() {
                 );
               })}
               {generatedItems.size === 0 && (
-                <p className="text-gray-500 text-center py-4">No items yet</p>
+                <p className="text-gray-500 text-center py-4">Ingen varer ennå</p>
               )}
             </CardContent>
           </Card>
 
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setStep('meals')}>
-              Back
+              Tilbake
             </Button>
             <Button variant="outline" onClick={() => setStep('add')}>
-              Add More Items
+              Legg til flere varer
             </Button>
             <Button onClick={createList} isLoading={isCreating} disabled={generatedItems.size === 0}>
-              Create List
+              Opprett liste
             </Button>
           </div>
         </div>
@@ -355,7 +368,7 @@ export default function NewShoppingListPage() {
         <div>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Add Items by Category</CardTitle>
+              <CardTitle>Legg til varer per kategori</CardTitle>
             </CardHeader>
             <CardContent>
               {sortedCategories.map((category) => {
@@ -396,7 +409,7 @@ export default function NewShoppingListPage() {
               })}
               {commonItems.length === 0 && (
                 <p className="text-gray-500 text-center py-4">
-                  No common items yet. Add some in the Common Items page.
+                  Ingen faste varer ennå. Legg til noen på Faste varer-siden.
                 </p>
               )}
             </CardContent>
@@ -405,7 +418,7 @@ export default function NewShoppingListPage() {
           {generatedItems.size > 0 && (
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle>Current List ({generatedItems.size} items)</CardTitle>
+                <CardTitle>Nåværende liste ({generatedItems.size} varer)</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="max-h-48 overflow-y-auto px-6 py-3">
@@ -415,9 +428,7 @@ export default function NewShoppingListPage() {
                       className="flex items-center justify-between py-1"
                     >
                       <span className="text-gray-900 text-sm">
-                        {item.quantity && `${item.quantity} `}
-                        {item.unit && `${item.unit} `}
-                        {item.name}
+                        {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
                       </span>
                       <button
                         onClick={() => removeItem(key)}
@@ -436,10 +447,10 @@ export default function NewShoppingListPage() {
 
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setStep(selectedMeals.size > 0 ? 'review' : 'meals')}>
-              Back
+              Tilbake
             </Button>
             <Button onClick={createList} isLoading={isCreating} disabled={generatedItems.size === 0}>
-              Create List ({generatedItems.size} items)
+              Opprett liste ({generatedItems.size} varer)
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 // Database types
 
 export type Role = 'admin' | 'member';
-export type IngredientCategory = 'produce' | 'dairy' | 'meat' | 'pantry' | 'frozen' | 'other';
+export type IngredientCategory = 'produce' | 'dairy' | 'meat' | 'pantry' | 'frozen' | 'toppings' | 'baked_goods' | 'other';
 export type ShoppingListStatus = 'active' | 'completed';
 
 export interface Household {
@@ -118,14 +118,18 @@ export const DEFAULT_CATEGORIES: IngredientCategory[] = [
   'meat',
   'frozen',
   'pantry',
+  'toppings',
+  'baked_goods',
   'other',
 ];
 
 export const CATEGORY_LABELS: Record<IngredientCategory, string> = {
-  produce: 'Frukt og gr\u00f8nt',
-  dairy: 'Meieri',
-  meat: 'Kj\u00f8tt og fisk',
+  produce: 'Frukt og grønt',
+  dairy: 'Meierivarer',
+  meat: 'Kjøtt og fisk',
   frozen: 'Frysevarer',
-  pantry: 'T\u00f8rrvarer',
+  pantry: 'Tørrvarer',
+  toppings: 'Brød og pålegg',
+  baked_goods: 'Bakevarer',
   other: 'Annet',
 };

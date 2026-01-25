@@ -146,12 +146,12 @@ export default function CommonItemsPage() {
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Common Items</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Faste varer</h1>
           <p className="text-gray-500 text-sm mt-1">
-            Your frequently bought items for quick shopping list creation
+            Varer du kjøper ofte
           </p>
         </div>
-        <Button onClick={() => setShowAddModal(true)}>Add Item</Button>
+        <Button onClick={() => setShowAddModal(true)}>Legg til vare</Button>
       </div>
 
       {items.length > 0 ? (
@@ -182,7 +182,7 @@ export default function CommonItemsPage() {
                             </span>
                             {item.purchase_count > 0 && (
                               <span className="ml-2 text-xs text-gray-400">
-                                ({item.purchase_count} times)
+                                ({item.purchase_count} ganger)
                               </span>
                             )}
                           </div>
@@ -221,9 +221,9 @@ export default function CommonItemsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
               }
-              title="No common items yet"
-              description="Add items you buy frequently for quick shopping list creation"
-              action={<Button onClick={() => setShowAddModal(true)}>Add your first item</Button>}
+              title="Ingen faste varer ennå"
+              description="Legg til varer du ofte kjøper for rask oppretting av handlelister"
+              action={<Button onClick={() => setShowAddModal(true)}>Legg til din første vare</Button>}
             />
           </CardContent>
         </Card>
@@ -233,18 +233,18 @@ export default function CommonItemsPage() {
       <Modal
         isOpen={showAddModal}
         onClose={resetForm}
-        title={editingItem ? 'Edit Item' : 'Add Common Item'}
+        title={editingItem ? 'Rediger vare' : 'Legg til fast vare'}
       >
         <div className="space-y-4">
           <Input
-            label="Item Name"
+            label="Varenavn"
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
-            placeholder="e.g., Milk"
+            placeholder="f.eks. Melk"
           />
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Default Quantity (optional)"
+              label="Standard antall (valgfritt)"
               type="number"
               step="0.1"
               value={itemQuantity}
@@ -252,24 +252,24 @@ export default function CommonItemsPage() {
               placeholder="1"
             />
             <Input
-              label="Unit (optional)"
+              label="Enhet (valgfritt)"
               value={itemUnit}
               onChange={(e) => setItemUnit(e.target.value)}
-              placeholder="gallon"
+              placeholder="liter"
             />
           </div>
           <Select
-            label="Category"
+            label="Kategori"
             options={categoryOptions}
             value={itemCategory}
             onChange={(e) => setItemCategory(e.target.value as IngredientCategory)}
           />
           <div className="flex gap-3 justify-end pt-2">
             <Button variant="outline" onClick={resetForm}>
-              Cancel
+              Avbryt
             </Button>
             <Button onClick={handleSave} isLoading={isSaving}>
-              {editingItem ? 'Save Changes' : 'Add Item'}
+              {editingItem ? 'Lagre endringer' : 'Legg til vare'}
             </Button>
           </div>
         </div>
