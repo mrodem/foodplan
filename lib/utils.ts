@@ -6,7 +6,14 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  let d: Date;
+  if (typeof date === 'string') {
+    // Parse date string as local time (not UTC) to avoid timezone shifts
+    const [year, month, day] = date.split('-').map(Number);
+    d = new Date(year, month - 1, day);
+  } else {
+    d = date;
+  }
   return d.toLocaleDateString('nb-NO', {
     weekday: 'short',
     month: 'short',
