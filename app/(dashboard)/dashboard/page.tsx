@@ -1,54 +1,110 @@
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui';
 import { getWeekDates, toDateString, formatDate } from '@/lib/utils';
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+interface MealPlan {
+  id: string;
+  date: string;
+  recipes: { name: string };
+}
 
-  if (!user) {
-    redirect('/auth/login');
-  }
+interface ShoppingList {
+  id: string;
+  name: string;
+  shopping_list_items: { is_purchased: boolean }[];
+}
 
-  // Get user's household
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('household_id')
-    .eq('user_id', user.id)
-    .single();
+export default function DashboardPage() {
+  const router = useRouter();
+  const supabase = createClient();
 
-  if (!membership) {
-    redirect('/settings');
-  }
+  const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
+  const [recipeCount, setRecipeCount] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const householdId = membership.household_id;
-
-  // Get this week's meal plans
   const weekDates = getWeekDates();
-  const { data: mealPlans } = await supabase
-    .from('meal_plans')
-    .select('*, recipes(name)')
-    .eq('household_id', householdId)
-    .gte('date', toDateString(weekDates[0]))
-    .lte('date', toDateString(weekDates[6]))
-    .order('date');
 
-  // Get active shopping lists
-  const { data: shoppingLists } = await supabase
-    .from('shopping_lists')
-    .select('*, shopping_list_items(is_purchased)')
-    .eq('household_id', householdId)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false })
-    .limit(3);
+  useEffect(() => {
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // Get recipe count
-  const { count: recipeCount } = await supabase
-    .from('recipes')
-    .select('*', { count: 'exact', head: true })
-    .eq('household_id', householdId);
+  async function loadData() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    const { data: membership } = await supabase
+      .from('household_members')
+      .select('household_id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!membership) {
+      router.push('/settings');
+      return;
+    }
+
+    const householdId = membership.household_id;
+
+    // Get this week's meal plans
+    const { data: plans } = await supabase
+      .from('meal_plans')
+      .select('*, recipes(name)')
+      .eq('household_id', householdId)
+      .gte('date', toDateString(weekDates[0]))
+      .lte('date', toDateString(weekDates[6]))
+      .order('date');
+
+    if (plans) {
+      setMealPlans(plans);
+    }
+
+    // Get active shopping lists
+    const { data: lists } = await supabase
+      .from('shopping_lists')
+      .select('*, shopping_list_items(is_purchased)')
+      .eq('household_id', householdId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (lists) {
+      setShoppingLists(lists);
+    }
+
+    // Get recipe count
+    const { count } = await supabase
+      .from('recipes')
+      .select('*', { count: 'exact', head: true })
+      .eq('household_id', householdId);
+
+    setRecipeCount(count || 0);
+    setLoading(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="h-24 bg-gray-200 rounded-xl" />
+            <div className="h-24 bg-gray-200 rounded-xl" />
+            <div className="h-24 bg-gray-200 rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
