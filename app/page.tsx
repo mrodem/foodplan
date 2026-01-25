@@ -36,8 +36,7 @@ export default async function LandingPage() {
             Enkel middagsplanlegging for familien
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Planlegg ukens middager, del oppskrifter og handle sammen. Sanntidssynkroniserte
-            handlelister holder alle oppdatert i butikken.
+            Planlegg ukens middager og lag handlelister automatisk basert på neste dagers meny.
           </p>
           <Link
             href="/auth/signup"
@@ -50,8 +49,8 @@ export default async function LandingPage() {
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard
             icon={<RecipeIcon />}
-            title="Oppskriftssamling"
-            description="Bygg familiens oppskriftssamling med ingredienser organisert etter butikkhylle."
+            title="Oppskriftsbibliotek"
+            description="Bygg familiens oppskriftsbibliotek med nødvendige ingredienser."
           />
           <FeatureCard
             icon={<CalendarIcon />}
@@ -61,7 +60,7 @@ export default async function LandingPage() {
           <FeatureCard
             icon={<CartIcon />}
             title="Smart handletur"
-            description="Generer handlelister fra ukesmenyen. Huk av varer i sanntid sammen."
+            description="Generer handlelister fra ukesmenyen. Legg til flere varer etter behov."
           />
         </div>
 
@@ -71,9 +70,9 @@ export default async function LandingPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <Step number={1} title="Opprett husstand" description="Sett opp familiegruppen og inviter medlemmer" />
-            <Step number={2} title="Legg til oppskrifter" description="Bygg oppskriftssamlingen med ingredienser" />
+            <Step number={2} title="Legg til oppskrifter" description="Bygg oppskriftsbibliotek med ingredienser" />
             <Step number={3} title="Planlegg middager" description="Fordel middager utover ukedagene" />
-            <Step number={4} title="Handle sammen" description="Generer lister og huk av varer i sanntid" />
+            <Step number={4} title="Lag handleliste" description="Lag handleliste sortert etter hyllene i butikken." />
           </div>
         </div>
       </div>
