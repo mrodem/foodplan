@@ -149,15 +149,15 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={toDateString(date)}
-                      className={`flex items-center justify-between py-2 px-3 rounded-lg ${
+                      className={`flex items-center gap-4 py-2 px-3 rounded-lg ${
                         isToday ? 'bg-green-50' : 'bg-gray-50'
                       }`}
                     >
-                      <span className={`text-sm font-medium ${isToday ? 'text-green-700' : 'text-gray-600'}`}>
+                      <span className={`text-sm font-medium w-24 shrink-0 ${isToday ? 'text-green-700' : 'text-gray-600'}`}>
                         {formatDate(date)}
-                        {isToday && <span className="ml-2 text-xs">(I dag)</span>}
+                        {isToday && <span className="ml-1 text-xs">(I dag)</span>}
                       </span>
-                      <span className={`text-sm ${plan ? 'text-gray-900' : 'text-gray-400'}`}>
+                      <span className={`text-sm text-left ${plan ? 'text-gray-900' : 'text-gray-400'}`}>
                         {plan ? plan.recipes.name : 'Ingen middag planlagt'}
                       </span>
                     </div>

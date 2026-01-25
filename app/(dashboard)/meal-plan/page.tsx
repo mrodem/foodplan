@@ -209,7 +209,7 @@ export default function MealPlanPage() {
                       <p className="font-medium">{date.toLocaleDateString('nb-NO', { weekday: 'short' })}</p>
                       <p className="text-sm">{date.toLocaleDateString('nb-NO', { month: 'short', day: 'numeric' })}</p>
                     </div>
-                    <div>
+                    <div className="text-left">
                       {meal ? (
                         <p className={`font-medium ${past ? 'text-gray-500' : 'text-gray-900'}`}>
                           {meal.recipes?.name}
