@@ -16,10 +16,9 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to test th
 
 ### Accounts
 
-1. When registering, the user must enter a name
-2. Allow registering with Google account, which automatically adds email and name
-3. SSO when already logged in to Google account
-4. Improve confirmation email
+1. Allow registering with Google account, which automatically adds email and name
+2. SSO when already logged in to Google account
+3. Improve confirmation email
 
 ### Home page
 
@@ -36,8 +35,3 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to test th
 ### Recipes
 
 1. Get new recipe suggestions from AI based on recipe list
-
-## Known bugs
-
-1. On the dashboard, next monday's meal shows up on sunday current week
-2. After clicking the confirmation link, redirect to dashboard (?)

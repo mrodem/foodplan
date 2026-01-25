@@ -58,7 +58,10 @@ export function Sidebar({ userName, userEmail, householdName, needsHousehold }: 
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="text-lg font-semibold text-green-600">Matplan</span>
+          <div className="flex items-center">
+            <LogoIcon className="h-6 w-6 text-green-600 mr-1.5" />
+            <span className="text-lg font-semibold text-green-600">MatPlan</span>
+          </div>
           <div className="w-6" />
         </div>
       </div>
@@ -125,7 +128,8 @@ function SidebarContent({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center h-16 px-4 border-b border-gray-200">
-        <span className="text-xl font-bold text-green-600">Matplan</span>
+        <LogoIcon className="h-8 w-8 text-green-600 mr-2" />
+        <span className="text-xl font-bold text-green-600">MatPlan</span>
         {onClose && (
           <button onClick={onClose} className="ml-auto text-gray-500 lg:hidden">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -241,6 +245,35 @@ function LogoutIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+    </svg>
+  );
+}
+
+function LogoIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      {/* Bowl */}
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 11c0 4.418 3.582 8 8 8s8-3.582 8-8H4z"
+      />
+      {/* Leaf/steam */}
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 4c-1.5 0-3 1-3 3 0 1.5 1.5 2 3 2s3-.5 3-2c0-2-1.5-3-3-3z"
+        fill="currentColor"
+        fillOpacity={0.2}
+      />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1.5}
+        d="M12 9v2"
+      />
     </svg>
   );
 }

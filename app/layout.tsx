@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Matplan - Ukesmeny og handleliste for familien",
-  description: "Planlegg middager, del oppskrifter og handle sammen som familie",
+  title: "MatPlan - Ukesmeny og handleliste for familien",
+  description: "Planlegg middager og lag handleliste",
 };
 
 export default function RootLayout({

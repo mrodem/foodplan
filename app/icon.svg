@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+  <!-- Background circle -->
+  <circle cx="12" cy="12" r="12" fill="#16a34a"/>
+  <!-- Bowl -->
+  <path
+    stroke="white"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="1.5"
+    d="M5 11c0 3.866 3.134 7 7 7s7-3.134 7-7H5z"
+  />
+  <!-- Leaf/steam -->
+  <path
+    stroke="white"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="1.5"
+    fill="white"
+    fillOpacity="0.3"
+    d="M12 5c-1.25 0-2.5.833-2.5 2.5 0 1.25 1.25 1.667 2.5 1.667s2.5-.417 2.5-1.667C14.5 5.833 13.25 5 12 5z"
+  />
+  <path
+    stroke="white"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="1.25"
+    d="M12 9.167V11"
+  />
+</svg>

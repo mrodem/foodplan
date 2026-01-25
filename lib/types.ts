@@ -137,6 +137,6 @@ export const CATEGORY_LABELS: Record<IngredientCategory, string> = {
   frozen: 'Frysevarer',
   pantry: 'Tørrvarer',
   toppings: 'Brød og pålegg',
-  baked_goods: 'Bakevarer',
+  baked_goods: 'Baking',
   other: 'Annet',
 };
