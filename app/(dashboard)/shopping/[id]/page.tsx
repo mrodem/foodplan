@@ -205,7 +205,11 @@ export default function ShoppingListDetailPage() {
         .single();
 
       if (newItem) {
-        setItems((prev) => [...prev, newItem]);
+        setItems((prev) => {
+          // Prevent duplicates (in case realtime also fires)
+          if (prev.some((i) => i.id === newItem.id)) return prev;
+          return [...prev, newItem];
+        });
       }
     }
 
@@ -266,7 +270,11 @@ export default function ShoppingListDetailPage() {
         .single();
 
       if (newItem) {
-        setItems((prev) => [...prev, newItem]);
+        setItems((prev) => {
+          // Prevent duplicates (in case realtime also fires)
+          if (prev.some((i) => i.id === newItem.id)) return prev;
+          return [...prev, newItem];
+        });
       }
     }
 
