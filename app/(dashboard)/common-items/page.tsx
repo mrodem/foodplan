@@ -19,8 +19,6 @@ export default function CommonItemsPage() {
   const [editingItem, setEditingItem] = useState<CommonItem | null>(null);
   const [itemName, setItemName] = useState('');
   const [itemCategory, setItemCategory] = useState<IngredientCategory>('other');
-  const [itemQuantity, setItemQuantity] = useState('');
-  const [itemUnit, setItemUnit] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -77,8 +75,6 @@ export default function CommonItemsPage() {
         .update({
           name: itemName.trim(),
           category: itemCategory,
-          default_quantity: itemQuantity ? parseFloat(itemQuantity) : null,
-          default_unit: itemUnit.trim() || null,
         })
         .eq('id', editingItem.id);
     } else {
@@ -86,8 +82,6 @@ export default function CommonItemsPage() {
         household_id: householdId,
         name: itemName.trim(),
         category: itemCategory,
-        default_quantity: itemQuantity ? parseFloat(itemQuantity) : null,
-        default_unit: itemUnit.trim() || null,
       });
     }
 
@@ -106,16 +100,12 @@ export default function CommonItemsPage() {
     setEditingItem(null);
     setItemName('');
     setItemCategory('other');
-    setItemQuantity('');
-    setItemUnit('');
   };
 
   const openEditModal = (item: CommonItem) => {
     setEditingItem(item);
     setItemName(item.name);
     setItemCategory(item.category);
-    setItemQuantity(item.default_quantity?.toString() || '');
-    setItemUnit(item.default_unit || '');
     setShowAddModal(true);
   };
 
@@ -175,16 +165,7 @@ export default function CommonItemsPage() {
                           className="flex items-center justify-between px-6 py-3 hover:bg-gray-50"
                         >
                           <div>
-                            <span className="font-medium text-gray-900">
-                              {item.default_quantity && `${item.default_quantity} `}
-                              {item.default_unit && `${item.default_unit} `}
-                              {item.name}
-                            </span>
-                            {item.purchase_count > 0 && (
-                              <span className="ml-2 text-xs text-gray-400">
-                                ({item.purchase_count} ganger)
-                              </span>
-                            )}
+                            <span className="font-medium text-gray-900">{item.name}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <button
@@ -242,22 +223,6 @@ export default function CommonItemsPage() {
             onChange={(e) => setItemName(e.target.value)}
             placeholder="f.eks. Melk"
           />
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Standard antall (valgfritt)"
-              type="number"
-              step="0.1"
-              value={itemQuantity}
-              onChange={(e) => setItemQuantity(e.target.value)}
-              placeholder="1"
-            />
-            <Input
-              label="Enhet (valgfritt)"
-              value={itemUnit}
-              onChange={(e) => setItemUnit(e.target.value)}
-              placeholder="liter"
-            />
-          </div>
           <Select
             label="Kategori"
             options={categoryOptions}

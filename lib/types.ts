@@ -27,6 +27,13 @@ export interface HouseholdInvite {
   expires_at: string;
 }
 
+export interface Profile {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+}
+
 export interface Recipe {
   id: string;
   household_id: string;

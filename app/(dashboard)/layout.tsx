@@ -14,6 +14,13 @@ export default async function DashboardLayout({
     redirect('/auth/login');
   }
 
+  // Get user's profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('name')
+    .eq('user_id', user.id)
+    .single();
+
   // Check if user has a household
   const { data: membership } = await supabase
     .from('household_members')
@@ -29,6 +36,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <Sidebar
+        userName={profile?.name || 'Bruker'}
         userEmail={user.email!}
         householdName={household?.name}
         needsHousehold={needsHousehold}

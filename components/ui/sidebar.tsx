@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 interface SidebarProps {
+  userName: string;
   userEmail: string;
   householdName?: string;
   needsHousehold?: boolean;
@@ -27,7 +28,7 @@ const navigation: NavItem[] = [
   { name: 'Innstillinger', href: '/settings', icon: SettingsIcon },
 ];
 
-export function Sidebar({ userEmail, householdName, needsHousehold }: SidebarProps) {
+export function Sidebar({ userName, userEmail, householdName, needsHousehold }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -70,6 +71,7 @@ export function Sidebar({ userEmail, householdName, needsHousehold }: SidebarPro
             <SidebarContent
               navigation={navigation}
               isActive={isActive}
+              userName={userName}
               userEmail={userEmail}
               householdName={householdName}
               needsHousehold={needsHousehold}
@@ -86,6 +88,7 @@ export function Sidebar({ userEmail, householdName, needsHousehold }: SidebarPro
           <SidebarContent
             navigation={navigation}
             isActive={isActive}
+            userName={userName}
             userEmail={userEmail}
             householdName={householdName}
             needsHousehold={needsHousehold}
@@ -103,6 +106,7 @@ export function Sidebar({ userEmail, householdName, needsHousehold }: SidebarPro
 function SidebarContent({
   navigation,
   isActive,
+  userName,
   userEmail,
   householdName,
   needsHousehold,
@@ -111,6 +115,7 @@ function SidebarContent({
 }: {
   navigation: NavItem[];
   isActive: (href: string) => boolean;
+  userName: string;
   userEmail: string;
   householdName?: string;
   needsHousehold?: boolean;
@@ -169,6 +174,7 @@ function SidebarContent({
       </nav>
 
       <div className="border-t border-gray-200 p-4">
+        <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
         <p className="text-xs text-gray-500 truncate mb-2">{userEmail}</p>
         <button
           onClick={onSignOut}

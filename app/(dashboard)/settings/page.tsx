@@ -9,9 +9,9 @@ import { CATEGORY_LABELS, type IngredientCategory } from '@/lib/types';
 export default function SettingsPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [user, setUser] = useState<{ id: string; email: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email: string; name: string } | null>(null);
   const [household, setHousehold] = useState<{ id: string; name: string } | null>(null);
-  const [members, setMembers] = useState<{ id: string; user_id: string; role: string; email: string }[]>([]);
+  const [members, setMembers] = useState<{ id: string; user_id: string; role: string; name: string }[]>([]);
   const [invites, setInvites] = useState<{ id: string; email: string; created_at: string }[]>([]);
   const [pendingInvites, setPendingInvites] = useState<{ id: string; household_id: string; households: { name: string } }[]>([]);
   const [categoryOrders, setCategoryOrders] = useState<{ category: IngredientCategory; sort_order: number }[]>([]);
@@ -35,7 +35,14 @@ export default function SettingsPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    setUser({ id: user.id, email: user.email! });
+    // Get current user's profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('user_id', user.id)
+      .single();
+
+    setUser({ id: user.id, email: user.email!, name: profile?.name || 'Ukjent' });
 
     // Get user's household membership
     const { data: membership } = await supabase
@@ -56,14 +63,24 @@ export default function SettingsPage() {
         .eq('household_id', membership.household_id);
 
       if (membersData) {
-        // Get emails for members
-        const memberEmails = await Promise.all(
-          membersData.map(async (m) => {
-            const { data: userData } = await supabase.auth.admin.getUserById(m.user_id);
-            return { ...m, email: userData?.user?.email || 'Ukjent' };
-          })
+        // Get profiles for all members
+        const userIds = membersData.map((m) => m.user_id);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, name')
+          .in('user_id', userIds);
+
+        const profileMap = new Map(
+          (profilesData || []).map((p) => [p.user_id, p.name])
         );
-        setMembers(memberEmails);
+
+        const membersWithNames = membersData.map((m) => ({
+          id: m.id,
+          user_id: m.user_id,
+          role: m.role,
+          name: profileMap.get(m.user_id) || 'Ukjent',
+        }));
+        setMembers(membersWithNames);
       }
 
       // Get invites
@@ -303,7 +320,7 @@ export default function SettingsPage() {
                 <div className="space-y-2">
                   {members.map((member) => (
                     <div key={member.id} className="flex items-center justify-between py-2">
-                      <span className="text-sm">{member.email}</span>
+                      <span className="text-sm">{member.name}</span>
                       <Badge>{member.role === 'admin' ? 'Admin' : 'Medlem'}</Badge>
                     </div>
                   ))}

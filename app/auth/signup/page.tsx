@@ -7,6 +7,7 @@ import { Button, Input, Card, CardContent } from '@/components/ui';
 
 export default function SignUpPage() {
   const supabase = createClient();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,6 +18,11 @@ export default function SignUpPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!name.trim()) {
+      setError('Vennligst skriv inn navnet ditt');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Passordene er ikke like');
@@ -35,6 +41,9 @@ export default function SignUpPage() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          name: name.trim(),
+        },
       },
     });
 
@@ -81,6 +90,16 @@ export default function SignUpPage() {
           </div>
 
           <form onSubmit={handleSignUp} className="space-y-4">
+            <Input
+              id="name"
+              type="text"
+              label="Navn"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ditt navn"
+              required
+            />
+
             <Input
               id="email"
               type="email"
