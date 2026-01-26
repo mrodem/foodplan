@@ -25,6 +25,7 @@ export default function MealPlanPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showRecipePicker, setShowRecipePicker] = useState(false);
   const [sortBy, setSortBy] = useState<'name' | 'least_used'>('least_used');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const baseDate = new Date();
   baseDate.setDate(baseDate.getDate() + weekOffset * 7);
@@ -117,16 +118,20 @@ export default function MealPlanPage() {
     loadData();
   };
 
-  const sortedRecipes = [...recipes].sort((a, b) => {
-    if (sortBy === 'name') {
-      return a.name.localeCompare(b.name);
-    }
-    // Sort by least recently used (null dates first)
-    if (!a.last_used_at && !b.last_used_at) return a.name.localeCompare(b.name);
-    if (!a.last_used_at) return -1;
-    if (!b.last_used_at) return 1;
-    return new Date(a.last_used_at).getTime() - new Date(b.last_used_at).getTime();
-  });
+  const filteredAndSortedRecipes = [...recipes]
+    .filter((recipe) =>
+      searchQuery === '' || recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      // Sort by least recently used (null dates first)
+      if (!a.last_used_at && !b.last_used_at) return a.name.localeCompare(b.name);
+      if (!a.last_used_at) return -1;
+      if (!b.last_used_at) return 1;
+      return new Date(a.last_used_at).getTime() - new Date(b.last_used_at).getTime();
+    });
 
   const isToday = (date: Date) => toDateString(date) === toDateString(new Date());
   const isPast = (date: Date) => date < new Date(new Date().setHours(0, 0, 0, 0));
@@ -251,38 +256,60 @@ export default function MealPlanPage() {
         onClose={() => {
           setShowRecipePicker(false);
           setSelectedDate(null);
+          setSearchQuery('');
         }}
         title={selectedDate ? `Velg middag for ${formatDate(selectedDate)}` : 'Velg middag'}
         className="max-w-lg"
       >
         {recipes.length > 0 ? (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-500">{recipes.length} oppskrifter</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as 'name' | 'least_used')}
-                className="text-sm border border-gray-300 rounded-lg px-2 py-1"
-              >
-                <option value="least_used">Ikke laget på lengst</option>
-                <option value="name">Alfabetisk</option>
-              </select>
+            <div className="mb-3">
+              <input
+                type="text"
+                placeholder="Søk etter oppskrift..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                autoFocus
+              />
             </div>
-            <div className="max-h-80 overflow-y-auto space-y-2">
-              {sortedRecipes.map((recipe) => (
-                <button
-                  key={recipe.id}
-                  onClick={() => handleSelectRecipe(recipe.id)}
-                  className="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors"
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-gray-500">
+                {filteredAndSortedRecipes.length} av {recipes.length} oppskrifter
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500">Sortering:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'name' | 'least_used')}
+                  className="text-sm border border-gray-300 rounded-lg px-2 py-1"
                 >
-                  <p className="font-medium text-gray-900">{recipe.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {recipe.last_used_at
-                      ? `Sist laget: ${new Date(recipe.last_used_at).toLocaleDateString('nb-NO')}`
-                      : 'Aldri laget'}
-                  </p>
-                </button>
-              ))}
+                  <option value="least_used">Lengst siden</option>
+                  <option value="name">Alfabetisk</option>
+                </select>
+              </div>
+            </div>
+            <div className="max-h-72 overflow-y-auto space-y-2">
+              {filteredAndSortedRecipes.length > 0 ? (
+                filteredAndSortedRecipes.map((recipe) => (
+                  <button
+                    key={recipe.id}
+                    onClick={() => handleSelectRecipe(recipe.id)}
+                    className="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <p className="font-medium text-gray-900">{recipe.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {recipe.last_used_at
+                        ? `Sist laget: ${new Date(recipe.last_used_at).toLocaleDateString('nb-NO')}`
+                        : 'Aldri laget'}
+                    </p>
+                  </button>
+                ))
+              ) : (
+                <p className="text-center text-gray-500 py-4">
+                  Ingen oppskrifter matcher &quot;{searchQuery}&quot;
+                </p>
+              )}
             </div>
           </>
         ) : (
