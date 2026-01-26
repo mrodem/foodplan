@@ -199,13 +199,15 @@ export default function SettingsPage() {
     setActionLoading(true);
     setError(null);
 
-    const { error: inviteError } = await supabase
+    const { data: newInvite, error: inviteError } = await supabase
       .from('household_invites')
       .insert({
         household_id: household!.id,
-        email: inviteEmail,
+        email: inviteEmail.toLowerCase().trim(),
         invited_by: user!.id,
-      });
+      })
+      .select()
+      .single();
 
     if (inviteError) {
       setError(inviteError.message);
@@ -213,9 +215,15 @@ export default function SettingsPage() {
       return;
     }
 
+    if (!newInvite) {
+      setError('Kunne ikke opprette invitasjon. Vennligst prøv igjen.');
+      setActionLoading(false);
+      return;
+    }
+
     setShowInvite(false);
     setInviteEmail('');
-    loadData();
+    await loadData();
     setActionLoading(false);
   }
 
