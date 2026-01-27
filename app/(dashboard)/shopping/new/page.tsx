@@ -346,6 +346,9 @@ export default function NewShoppingListPage() {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Se over generert liste</CardTitle>
+              <p className="text-sm text-gray-500 mt-1">
+                Du kan legge til flere varer etter at handlelisten er opprettet.
+              </p>
             </CardHeader>
             <CardContent>
               {sortedCategories.map((category) => {
@@ -399,9 +402,6 @@ export default function NewShoppingListPage() {
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setStep('meals')}>
               Tilbake
-            </Button>
-            <Button variant="outline" onClick={() => setStep('add')}>
-              Legg til flere varer
             </Button>
             <Button onClick={createList} isLoading={isCreating} disabled={generatedItems.size === 0}>
               Opprett liste
