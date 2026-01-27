@@ -27,12 +27,6 @@ export default function ShoppingListDetailPage() {
   const [newItemUnit, setNewItemUnit] = useState('');
   const [newItemCategory, setNewItemCategory] = useState<IngredientCategory>('other');
 
-  // Quick add modal (for common items)
-  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
-  const [quickAddItem, setQuickAddItem] = useState<CommonItem | null>(null);
-  const [quickAddQuantity, setQuickAddQuantity] = useState('');
-  const [quickAddUnit, setQuickAddUnit] = useState('');
-
   // Edit item modal
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingItem, setEditingItem] = useState<ShoppingListItem | null>(null);
@@ -220,22 +214,14 @@ export default function ShoppingListDetailPage() {
     setShowAddModal(false);
   };
 
-  const openQuickAddModal = (item: CommonItem) => {
-    setQuickAddItem(item);
-    setQuickAddQuantity(item.default_quantity?.toString() || '1');
-    setQuickAddUnit(item.default_unit || '');
-    setShowQuickAddModal(true);
-  };
+  const quickAddItem = async (item: CommonItem) => {
+    if (!userId) return;
 
-  const confirmQuickAdd = async () => {
-    if (!quickAddItem || !userId) return;
-
-    const quantity = quickAddQuantity ? parseFloat(quickAddQuantity) : 1;
-    const unit = quickAddUnit.trim() || null;
+    const quantity = 1;
 
     // Check if item already exists in list
     const existingItem = items.find(
-      (i) => i.name.toLowerCase() === quickAddItem.name.toLowerCase() && i.category === quickAddItem.category
+      (i) => i.name.toLowerCase() === item.name.toLowerCase() && i.category === item.category
     );
 
     if (existingItem) {
@@ -245,7 +231,7 @@ export default function ShoppingListDetailPage() {
 
       const { data: updatedItem } = await supabase
         .from('shopping_list_items')
-        .update({ quantity: newQty, unit: unit || existingItem.unit })
+        .update({ quantity: newQty })
         .eq('id', existingItem.id)
         .select()
         .single();
@@ -260,10 +246,10 @@ export default function ShoppingListDetailPage() {
         .from('shopping_list_items')
         .insert({
           list_id: listId,
-          name: quickAddItem.name,
+          name: item.name,
           quantity: quantity,
-          unit: unit,
-          category: quickAddItem.category,
+          unit: null,
+          category: item.category,
           added_by: userId,
         })
         .select()
@@ -277,11 +263,6 @@ export default function ShoppingListDetailPage() {
         });
       }
     }
-
-    setShowQuickAddModal(false);
-    setQuickAddItem(null);
-    setQuickAddQuantity('');
-    setQuickAddUnit('');
   };
 
   const openEditModal = (item: ShoppingListItem) => {
@@ -434,7 +415,7 @@ export default function ShoppingListDetailPage() {
                       {categoryCommonItems.map((item) => (
                         <button
                           key={item.id}
-                          onClick={() => openQuickAddModal(item)}
+                          onClick={() => quickAddItem(item)}
                           className="px-2 py-0.5 rounded text-xs transition-colors bg-white border border-gray-200 text-gray-600 hover:bg-green-50 hover:border-green-300 hover:text-green-700"
                         >
                           + {item.name}
@@ -579,51 +560,6 @@ export default function ShoppingListDetailPage() {
             Avbryt
           </Button>
           <Button onClick={completeList}>Fullfør liste</Button>
-        </div>
-      </Modal>
-
-      {/* Quick Add Modal */}
-      <Modal
-        isOpen={showQuickAddModal}
-        onClose={() => {
-          setShowQuickAddModal(false);
-          setQuickAddItem(null);
-        }}
-        title={`Legg til ${quickAddItem?.name || ''}`}
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Antall"
-              type="number"
-              step="0.1"
-              min="0.1"
-              value={quickAddQuantity}
-              onChange={(e) => setQuickAddQuantity(e.target.value)}
-              placeholder="1"
-            />
-            <Input
-              label="Enhet (valgfritt)"
-              value={quickAddUnit}
-              onChange={(e) => setQuickAddUnit(e.target.value)}
-              placeholder="stk, kg, l..."
-            />
-          </div>
-          {items.some(
-            (i) => quickAddItem && i.name.toLowerCase() === quickAddItem.name.toLowerCase() && i.category === quickAddItem.category
-          ) && (
-            <p className="text-sm text-amber-600">
-              Denne varen finnes allerede i listen. Antallet blir lagt til eksisterende mengde.
-            </p>
-          )}
-          <div className="flex gap-3 justify-end pt-2">
-            <Button variant="outline" onClick={() => setShowQuickAddModal(false)}>
-              Avbryt
-            </Button>
-            <Button onClick={confirmQuickAdd}>
-              Legg til
-            </Button>
-          </div>
         </div>
       </Modal>
 
