@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent, Modal } from '@/components/ui';
 import { toDateString, formatDate, groupBy } from '@/lib/utils';
 import { CATEGORY_LABELS, DEFAULT_CATEGORIES, type IngredientCategory, type MealPlan, type Recipe, type RecipeIngredient, type CommonItem } from '@/lib/types';
 
@@ -26,6 +26,12 @@ export default function NewShoppingListPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+
+  // Edit item modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
+  const [editQuantity, setEditQuantity] = useState('');
+  const [editUnit, setEditUnit] = useState('');
 
   // Get today's date for filtering meal plans
   const today = toDateString(new Date());
@@ -157,6 +163,34 @@ export default function NewShoppingListPage() {
     const newItems = new Map(generatedItems);
     newItems.delete(key);
     setGeneratedItems(newItems);
+  };
+
+  const openEditModal = (key: string) => {
+    const item = generatedItems.get(key);
+    if (item) {
+      setEditingItemKey(key);
+      setEditQuantity(item.quantity?.toString() || '1');
+      setEditUnit(item.unit || '');
+      setShowEditModal(true);
+    }
+  };
+
+  const saveItemEdit = () => {
+    if (!editingItemKey) return;
+
+    const newItems = new Map(generatedItems);
+    const item = newItems.get(editingItemKey);
+    if (item) {
+      item.quantity = editQuantity ? parseFloat(editQuantity) : 1;
+      item.unit = editUnit.trim() || null;
+      newItems.set(editingItemKey, item);
+      setGeneratedItems(newItems);
+    }
+
+    setShowEditModal(false);
+    setEditingItemKey(null);
+    setEditQuantity('');
+    setEditUnit('');
   };
 
   const createList = async () => {
@@ -330,14 +364,26 @@ export default function NewShoppingListPage() {
                           <span className="text-gray-900">
                             {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
                           </span>
-                          <button
-                            onClick={() => removeItem(key)}
-                            className="text-gray-400 hover:text-red-500"
-                          >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => openEditModal(key)}
+                              className="text-gray-400 hover:text-blue-500 p-1"
+                              title="Rediger"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => removeItem(key)}
+                              className="text-gray-400 hover:text-red-500 p-1"
+                              title="Fjern"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -455,6 +501,44 @@ export default function NewShoppingListPage() {
           </div>
         </div>
       )}
+
+      {/* Edit Item Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingItemKey(null);
+        }}
+        title={`Rediger ${editingItemKey ? generatedItems.get(editingItemKey)?.name : ''}`}
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Antall"
+              type="number"
+              step="0.1"
+              min="0.1"
+              value={editQuantity}
+              onChange={(e) => setEditQuantity(e.target.value)}
+              placeholder="1"
+            />
+            <Input
+              label="Enhet (valgfritt)"
+              value={editUnit}
+              onChange={(e) => setEditUnit(e.target.value)}
+              placeholder="stk, kg, l..."
+            />
+          </div>
+          <div className="flex gap-3 justify-end pt-2">
+            <Button variant="outline" onClick={() => setShowEditModal(false)}>
+              Avbryt
+            </Button>
+            <Button onClick={saveItemEdit}>
+              Lagre
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
