@@ -33,8 +33,8 @@ export default function ShoppingListDetailPage() {
   const [editQuantity, setEditQuantity] = useState('');
   const [editUnit, setEditUnit] = useState('');
 
-  // Complete list modal
-  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  // Delete list modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -214,6 +214,11 @@ export default function ShoppingListDetailPage() {
     setShowAddModal(false);
   };
 
+  const openAddModalForCategory = (category: IngredientCategory) => {
+    setNewItemCategory(category);
+    setShowAddModal(true);
+  };
+
   const quickAddItem = async (item: CommonItem) => {
     if (!userId) return;
 
@@ -307,7 +312,6 @@ export default function ShoppingListDetailPage() {
   const completeList = async () => {
     // Optimistic update
     setList((prev) => prev ? { ...prev, status: 'completed' } : prev);
-    setShowCompleteModal(false);
 
     await supabase
       .from('shopping_lists')
@@ -361,16 +365,6 @@ export default function ShoppingListDetailPage() {
           </svg>
           Tilbake
         </button>
-        {!isCompleted && (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowAddModal(true)}>
-              Legg til vare
-            </Button>
-            <Button size="sm" onClick={() => setShowCompleteModal(true)} disabled={purchasedItems !== totalItems}>
-              Fullfør
-            </Button>
-          </div>
-        )}
       </div>
 
       <div className="flex items-center justify-between mb-4">
@@ -405,7 +399,17 @@ export default function ShoppingListDetailPage() {
           return (
             <Card key={category} className={allPurchased ? 'opacity-60' : ''}>
               <CardHeader className="py-3">
-                <CardTitle className="text-base">{CATEGORY_LABELS[category]}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">{CATEGORY_LABELS[category]}</CardTitle>
+                  {!isCompleted && (
+                    <button
+                      onClick={() => openAddModalForCategory(category)}
+                      className="text-sm text-green-600 hover:text-green-700 font-medium"
+                    >
+                      + Legg til vare
+                    </button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="p-0">
                 {/* Quick add section */}
@@ -499,14 +503,23 @@ export default function ShoppingListDetailPage() {
         </Card>
       )}
 
+      {!isCompleted && items.length > 1 && (
+        <div className="py-6">
+          <Button size="sm" onClick={completeList} disabled={purchasedItems !== totalItems}>
+            Fullfør handleturen
+          </Button>
+        </div>
+      )}
+
       {/* Danger zone */}
       {!isCompleted && (
         <div className="mt-8 pt-8 border-t">
-          <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={deleteList}>
+          <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => setShowDeleteModal(true)}>
             Slett denne listen
           </Button>
         </div>
       )}
+
 
       {/* Add Item Modal */}
       <Modal isOpen={showAddModal} onClose={() => setShowAddModal(false)} title="Legg til vare">
@@ -550,16 +563,18 @@ export default function ShoppingListDetailPage() {
         </div>
       </Modal>
 
-      {/* Complete List Modal */}
-      <Modal isOpen={showCompleteModal} onClose={() => setShowCompleteModal(false)} title="Fullfør handleliste">
+      {/* Delete List Modal */}
+      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)} title="Slett handleliste">
         <p className="text-gray-600 mb-4">
-          Marker denne handlelisten som fullført? Du kan ikke redigere den etterpå.
+          Er du sikker på at du vil slette denne handlelisten? Dette kan ikke angres.
         </p>
         <div className="flex gap-3 justify-end">
-          <Button variant="outline" onClick={() => setShowCompleteModal(false)}>
+          <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
             Avbryt
           </Button>
-          <Button onClick={completeList}>Fullfør liste</Button>
+          <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={deleteList}>
+            Slett liste
+          </Button>
         </div>
       </Modal>
 
