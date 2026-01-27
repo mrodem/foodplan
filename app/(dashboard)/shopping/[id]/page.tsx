@@ -324,12 +324,15 @@ export default function ShoppingListDetailPage() {
   };
 
   const completeList = async () => {
+    // Optimistic update
+    setList((prev) => prev ? { ...prev, status: 'completed' } : prev);
+    setShowCompleteModal(false);
+
     await supabase
       .from('shopping_lists')
       .update({ status: 'completed' })
       .eq('id', listId);
 
-    setShowCompleteModal(false);
     router.push('/shopping');
   };
 
