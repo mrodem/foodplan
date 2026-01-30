@@ -48,6 +48,7 @@ export default function ShoppingListDetailPage() {
   // Confirm add recipe
   const [selectedRecipe, setSelectedRecipe] = useState<(Recipe & { recipe_ingredients: RecipeIngredient[] }) | null>(null);
 
+
   useEffect(() => {
     loadData();
     setupRealtimeSubscription();
@@ -163,20 +164,6 @@ export default function ShoppingListDetailPage() {
       supabase.removeChannel(channel);
     };
   }
-
-  const toggleItemPurchased = async (itemId: string, isPurchased: boolean) => {
-    // Optimistic update
-    setItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, is_purchased: !isPurchased } : item
-      )
-    );
-
-    await supabase
-      .from('shopping_list_items')
-      .update({ is_purchased: !isPurchased })
-      .eq('id', itemId);
-  };
 
   const addItem = async () => {
     if (!newItemName.trim() || !userId) return;
@@ -401,18 +388,6 @@ export default function ShoppingListDetailPage() {
     await supabase.from('shopping_list_items').delete().eq('id', itemId);
   };
 
-  const completeList = async () => {
-    // Optimistic update
-    setList((prev) => prev ? { ...prev, status: 'completed' } : prev);
-
-    await supabase
-      .from('shopping_lists')
-      .update({ status: 'completed' })
-      .eq('id', listId);
-
-    router.push('/shopping');
-  };
-
   const deleteList = async () => {
     await supabase.from('shopping_lists').delete().eq('id', listId);
     router.push('/shopping');
@@ -449,8 +424,6 @@ export default function ShoppingListDetailPage() {
 
   const groupedItems = groupBy(items, (item) => item.category);
   const totalItems = items.length;
-  const purchasedItems = items.filter((i) => i.is_purchased).length;
-  const progress = totalItems > 0 ? (purchasedItems / totalItems) * 100 : 0;
 
   const categoryOptions = DEFAULT_CATEGORIES.map((cat) => ({
     value: cat,
@@ -535,7 +508,7 @@ export default function ShoppingListDetailPage() {
             </div>
           )}
           <p className="text-sm text-gray-500">
-            {purchasedItems} av {totalItems} varer huket av
+            {totalItems} {totalItems === 1 ? 'vare' : 'varer'}
           </p>
         </div>
         {isCompleted && <Badge variant="success">Fullført</Badge>}
@@ -544,14 +517,6 @@ export default function ShoppingListDetailPage() {
             + Legg til oppskrift
           </Button>
         )}
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-3 bg-gray-200 rounded-full overflow-hidden mb-6">
-        <div
-          className="h-full bg-green-500 transition-all duration-300"
-          style={{ width: `${progress}%` }}
-        />
       </div>
 
       {/* Items by category */}
@@ -563,10 +528,8 @@ export default function ShoppingListDetailPage() {
           // Skip category if no items and no common items to add
           if (categoryItems.length === 0 && (isCompleted || categoryCommonItems.length === 0)) return null;
 
-          const allPurchased = categoryItems.length > 0 && categoryItems.every((i) => i.is_purchased);
-
           return (
-            <Card key={category} className={allPurchased ? 'opacity-60' : ''}>
+            <Card key={category}>
               <CardHeader className="py-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{CATEGORY_LABELS[category]}</CardTitle>
@@ -603,30 +566,9 @@ export default function ShoppingListDetailPage() {
                     {categoryItems.map((item) => (
                       <div
                         key={item.id}
-                        className={`flex items-center px-6 py-3 ${
-                          item.is_purchased ? 'bg-gray-50' : ''
-                        }`}
+                        className="flex items-center px-6 py-3"
                       >
-                        <button
-                          onClick={() => !isCompleted && toggleItemPurchased(item.id, item.is_purchased)}
-                          disabled={isCompleted}
-                          className={`flex-shrink-0 w-6 h-6 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                            item.is_purchased
-                              ? 'bg-green-500 border-green-500'
-                              : 'border-gray-300 hover:border-green-500'
-                          }`}
-                        >
-                          {item.is_purchased && (
-                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                            </svg>
-                          )}
-                        </button>
-                        <span
-                          className={`flex-1 ${
-                            item.is_purchased ? 'text-gray-400 line-through' : 'text-gray-900'
-                          }`}
-                        >
+                        <span className="flex-1 text-gray-900">
                           {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
                         </span>
                         {!isCompleted && (
@@ -672,10 +614,10 @@ export default function ShoppingListDetailPage() {
         </Card>
       )}
 
-      {!isCompleted && items.length > 1 && (
+      {!isCompleted && items.length > 0 && (
         <div className="py-6">
-          <Button size="sm" onClick={completeList} disabled={purchasedItems !== totalItems}>
-            Fullfør handleturen
+          <Button onClick={() => router.push(`/shopping/${listId}/shop`)}>
+            Start handleturen
           </Button>
         </div>
       )}
