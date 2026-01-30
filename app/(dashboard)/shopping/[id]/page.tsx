@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button, Card, CardHeader, CardTitle, CardContent, Modal, Input, Select, Badge } from '@/components/ui';
-import { CATEGORY_LABELS, DEFAULT_CATEGORIES, type IngredientCategory, type ShoppingList, type ShoppingListItem, type CommonItem } from '@/lib/types';
+import { CATEGORY_LABELS, DEFAULT_CATEGORIES, type IngredientCategory, type ShoppingList, type ShoppingListItem, type CommonItem, type Recipe, type RecipeIngredient } from '@/lib/types';
 import { groupBy } from '@/lib/utils';
 
 export default function ShoppingListDetailPage() {
@@ -35,6 +35,18 @@ export default function ShoppingListDetailPage() {
 
   // Delete list modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Add recipe modal
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [recipes, setRecipes] = useState<(Recipe & { recipe_ingredients: RecipeIngredient[] })[]>([]);
+  const [recipeSearchQuery, setRecipeSearchQuery] = useState('');
+
+  // Edit list name
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editListName, setEditListName] = useState('');
+
+  // Confirm add recipe
+  const [selectedRecipe, setSelectedRecipe] = useState<(Recipe & { recipe_ingredients: RecipeIngredient[] }) | null>(null);
 
   useEffect(() => {
     loadData();
@@ -99,6 +111,17 @@ export default function ShoppingListDetailPage() {
 
     if (common) {
       setCommonItems(common);
+    }
+
+    // Load recipes for adding to list
+    const { data: recipesData } = await supabase
+      .from('recipes')
+      .select('*, recipe_ingredients(*)')
+      .eq('household_id', membership.household_id)
+      .order('name');
+
+    if (recipesData) {
+      setRecipes(recipesData);
     }
 
     setLoading(false);
@@ -270,6 +293,75 @@ export default function ShoppingListDetailPage() {
     }
   };
 
+  const selectRecipeForConfirmation = (recipe: Recipe & { recipe_ingredients: RecipeIngredient[] }) => {
+    setSelectedRecipe(recipe);
+    setShowRecipeModal(false);
+  };
+
+  const confirmAddRecipe = async () => {
+    if (!userId || !selectedRecipe?.recipe_ingredients) return;
+
+    for (const ingredient of selectedRecipe.recipe_ingredients) {
+      const quantity = ingredient.quantity ?? 1;
+
+      // Check if item already exists in list
+      const existingItem = items.find(
+        (i) => i.name.toLowerCase() === ingredient.name.toLowerCase() && i.category === ingredient.category
+      );
+
+      if (existingItem) {
+        // Sum quantities
+        const existingQty = existingItem.quantity ?? 1;
+        const newQty = existingQty + quantity;
+
+        const { data: updatedItem } = await supabase
+          .from('shopping_list_items')
+          .update({ quantity: newQty, unit: ingredient.unit || existingItem.unit })
+          .eq('id', existingItem.id)
+          .select()
+          .single();
+
+        if (updatedItem) {
+          setItems((prev) =>
+            prev.map((i) => (i.id === existingItem.id ? updatedItem : i))
+          );
+        }
+      } else {
+        const { data: newItem } = await supabase
+          .from('shopping_list_items')
+          .insert({
+            list_id: listId,
+            name: ingredient.name,
+            quantity: quantity,
+            unit: ingredient.unit,
+            category: ingredient.category,
+            added_by: userId,
+          })
+          .select()
+          .single();
+
+        if (newItem) {
+          setItems((prev) => {
+            if (prev.some((i) => i.id === newItem.id)) return prev;
+            return [...prev, newItem];
+          });
+        }
+      }
+    }
+
+    setSelectedRecipe(null);
+    setRecipeSearchQuery('');
+  };
+
+  const cancelAddRecipe = () => {
+    setSelectedRecipe(null);
+    setShowRecipeModal(true);
+  };
+
+  const filteredRecipes = recipes.filter((recipe) =>
+    recipeSearchQuery === '' || recipe.name.toLowerCase().includes(recipeSearchQuery.toLowerCase())
+  );
+
   const openEditModal = (item: ShoppingListItem) => {
     setEditingItem(item);
     setEditQuantity(item.quantity?.toString() || '1');
@@ -326,6 +418,31 @@ export default function ShoppingListDetailPage() {
     router.push('/shopping');
   };
 
+  const startEditingName = () => {
+    setEditListName(list?.name || '');
+    setIsEditingName(true);
+  };
+
+  const saveListName = async () => {
+    if (!editListName.trim() || !list) return;
+
+    const newName = editListName.trim();
+
+    // Optimistic update
+    setList((prev) => prev ? { ...prev, name: newName } : prev);
+    setIsEditingName(false);
+
+    await supabase
+      .from('shopping_lists')
+      .update({ name: newName })
+      .eq('id', listId);
+  };
+
+  const cancelEditingName = () => {
+    setIsEditingName(false);
+    setEditListName('');
+  };
+
   const sortedCategories = categoryOrders.length > 0
     ? categoryOrders.map((o) => o.category)
     : DEFAULT_CATEGORIES;
@@ -369,12 +486,64 @@ export default function ShoppingListDetailPage() {
 
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{list.name}</h1>
+          {isEditingName ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={editListName}
+                onChange={(e) => setEditListName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') saveListName();
+                  if (e.key === 'Escape') cancelEditingName();
+                }}
+                className="text-2xl font-bold text-gray-900 border-b-2 border-green-500 focus:outline-none bg-transparent"
+                autoFocus
+              />
+              <button
+                onClick={saveListName}
+                className="text-green-600 hover:text-green-700 p-1"
+                title="Lagre"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </button>
+              <button
+                onClick={cancelEditingName}
+                className="text-gray-400 hover:text-gray-600 p-1"
+                title="Avbryt"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-gray-900">{list.name}</h1>
+              {!isCompleted && (
+                <button
+                  onClick={startEditingName}
+                  className="text-gray-400 hover:text-gray-600 p-1"
+                  title="Rediger navn"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
           <p className="text-sm text-gray-500">
             {purchasedItems} av {totalItems} varer huket av
           </p>
         </div>
         {isCompleted && <Badge variant="success">Fullført</Badge>}
+        {!isCompleted && (
+          <Button variant="outline" size="sm" onClick={() => setShowRecipeModal(true)}>
+            + Legg til oppskrift
+          </Button>
+        )}
       </div>
 
       {/* Progress bar */}
@@ -575,6 +744,101 @@ export default function ShoppingListDetailPage() {
           <Button variant="ghost" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={deleteList}>
             Slett liste
           </Button>
+        </div>
+      </Modal>
+
+      {/* Add Recipe Modal */}
+      <Modal
+        isOpen={showRecipeModal}
+        onClose={() => {
+          setShowRecipeModal(false);
+          setRecipeSearchQuery('');
+        }}
+        title="Legg til oppskrift"
+        className="max-w-lg"
+      >
+        {recipes.length > 0 ? (
+          <>
+            <div className="mb-3">
+              <input
+                type="text"
+                placeholder="Søk etter oppskrift..."
+                value={recipeSearchQuery}
+                onChange={(e) => setRecipeSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+            <p className="text-sm text-gray-500 mb-3">
+              {filteredRecipes.length} av {recipes.length} oppskrifter
+            </p>
+            <div className="max-h-72 overflow-y-auto space-y-2">
+              {filteredRecipes.length > 0 ? (
+                filteredRecipes.map((recipe) => (
+                  <button
+                    key={recipe.id}
+                    onClick={() => selectRecipeForConfirmation(recipe)}
+                    className="w-full text-left p-3 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <p className="font-medium text-gray-900">{recipe.name}</p>
+                    <p className="text-sm text-gray-500">
+                      {recipe.recipe_ingredients?.length || 0} ingredienser
+                    </p>
+                  </button>
+                ))
+              ) : (
+                <p className="text-center text-gray-500 py-4">
+                  Ingen oppskrifter matcher &quot;{recipeSearchQuery}&quot;
+                </p>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-6">
+            <p className="text-gray-500 mb-4">Ingen oppskrifter ennå</p>
+            <Button onClick={() => router.push('/recipes/new')}>
+              Legg til oppskrift
+            </Button>
+          </div>
+        )}
+      </Modal>
+
+      {/* Confirm Add Recipe Modal */}
+      <Modal
+        isOpen={selectedRecipe !== null}
+        onClose={cancelAddRecipe}
+        title={`Legg til "${selectedRecipe?.name || ''}"`}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Følgende varer vil bli lagt til i handlelisten:
+          </p>
+          <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100">
+            {selectedRecipe?.recipe_ingredients?.map((ingredient, index) => {
+              const existingItem = items.find(
+                (i) => i.name.toLowerCase() === ingredient.name.toLowerCase() && i.category === ingredient.category
+              );
+              return (
+                <div key={index} className="px-3 py-2 flex items-center justify-between">
+                  <span className="text-gray-900">
+                    {ingredient.quantity ?? 1}{ingredient.unit ? ` ${ingredient.unit}` : ''} {ingredient.name}
+                  </span>
+                  {existingItem && (
+                    <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+                      +{ingredient.quantity ?? 1} til eksisterende
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex gap-3 justify-end pt-2">
+            <Button variant="outline" onClick={cancelAddRecipe}>
+              Tilbake
+            </Button>
+            <Button onClick={confirmAddRecipe}>
+              Legg til {selectedRecipe?.recipe_ingredients?.length || 0} varer
+            </Button>
+          </div>
         </div>
       </Modal>
 
