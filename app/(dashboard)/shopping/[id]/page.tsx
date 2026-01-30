@@ -514,7 +514,7 @@ export default function ShoppingListDetailPage() {
         {isCompleted && <Badge variant="success">Fullført</Badge>}
         {!isCompleted && (
           <Button variant="outline" size="sm" onClick={() => setShowRecipeModal(true)}>
-            + Legg til oppskrift
+            + Oppskrift
           </Button>
         )}
       </div>
