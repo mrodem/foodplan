@@ -69,6 +69,7 @@ export interface ShoppingList {
   household_id: string;
   name: string;
   status: ShoppingListStatus;
+  shopping_started: boolean;
   created_at: string;
 }
 

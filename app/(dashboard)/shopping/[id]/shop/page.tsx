@@ -163,7 +163,7 @@ export default function ShoppingModePage() {
       <div className="sticky top-0 bg-white z-10 pb-4 -mx-4 px-4 pt-2">
         <div className="flex items-center justify-between mb-3">
           <button
-            onClick={() => router.push(`/shopping/${listId}`)}
+            onClick={() => router.push(`/shopping/${listId}?edit=true`)}
             className="text-sm text-gray-500 hover:text-gray-700"
           >
             ← Rediger liste
@@ -241,7 +241,6 @@ export default function ShoppingModePage() {
       {/* Complete button */}
       <div className="mt-6">
         <Button
-          className="w-full"
           onClick={completeList}
           disabled={!allDone}
         >

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button, Card, CardHeader, CardTitle, CardContent, Modal, Input, Select, Badge } from '@/components/ui';
 import { CATEGORY_LABELS, DEFAULT_CATEGORIES, type IngredientCategory, type ShoppingList, type ShoppingListItem, type CommonItem, type Recipe, type RecipeIngredient } from '@/lib/types';
@@ -10,8 +10,10 @@ import { groupBy } from '@/lib/utils';
 export default function ShoppingListDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const listId = params.id as string;
+  const isEditMode = searchParams.get('edit') === 'true';
 
   const [list, setList] = useState<ShoppingList | null>(null);
   const [items, setItems] = useState<ShoppingListItem[]>([]);
@@ -79,6 +81,13 @@ export default function ShoppingListDetailPage() {
       router.push('/shopping');
       return;
     }
+
+    // If shopping has started, redirect to shop mode (unless explicitly in edit mode)
+    if (listData.shopping_started && listData.status !== 'completed' && !isEditMode) {
+      router.push(`/shopping/${listId}/shop`);
+      return;
+    }
+
     setList(listData);
 
     // Load items
@@ -393,6 +402,15 @@ export default function ShoppingListDetailPage() {
     router.push('/shopping');
   };
 
+  const startShopping = async () => {
+    await supabase
+      .from('shopping_lists')
+      .update({ shopping_started: true })
+      .eq('id', listId);
+
+    router.push(`/shopping/${listId}/shop`);
+  };
+
   const startEditingName = () => {
     setEditListName(list?.name || '');
     setIsEditingName(true);
@@ -616,9 +634,15 @@ export default function ShoppingListDetailPage() {
 
       {!isCompleted && items.length > 0 && (
         <div className="py-6">
-          <Button onClick={() => router.push(`/shopping/${listId}/shop`)}>
-            Start handleturen
-          </Button>
+          {list.shopping_started ? (
+            <Button onClick={() => router.push(`/shopping/${listId}/shop`)}>
+              Tilbake til handletur
+            </Button>
+          ) : (
+            <Button onClick={startShopping}>
+              Start handleturen
+            </Button>
+          )}
         </div>
       )}
 
