@@ -194,7 +194,7 @@ export default function NewShoppingListPage() {
   };
 
   const createList = async () => {
-    if (!householdId || !userId || generatedItems.size === 0) return;
+    if (!householdId || !userId) return;
 
     setIsCreating(true);
 
@@ -213,17 +213,19 @@ export default function NewShoppingListPage() {
       return;
     }
 
-    // Add items to list
-    const itemsToInsert = Array.from(generatedItems.values()).map((item) => ({
-      list_id: list.id,
-      name: item.name,
-      quantity: item.quantity,
-      unit: item.unit,
-      category: item.category,
-      added_by: userId,
-    }));
+    // Add items to list (if any)
+    if (generatedItems.size > 0) {
+      const itemsToInsert = Array.from(generatedItems.values()).map((item) => ({
+        list_id: list.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        category: item.category,
+        added_by: userId,
+      }));
 
-    await supabase.from('shopping_list_items').insert(itemsToInsert);
+      await supabase.from('shopping_list_items').insert(itemsToInsert);
+    }
 
     router.push(`/shopping/${list.id}`);
   };
@@ -403,7 +405,7 @@ export default function NewShoppingListPage() {
             <Button variant="outline" onClick={() => setStep('meals')}>
               Tilbake
             </Button>
-            <Button onClick={createList} isLoading={isCreating} disabled={generatedItems.size === 0}>
+            <Button onClick={createList} isLoading={isCreating}>
               Opprett liste
             </Button>
           </div>
@@ -495,8 +497,8 @@ export default function NewShoppingListPage() {
             <Button variant="outline" onClick={() => setStep(selectedMeals.size > 0 ? 'review' : 'meals')}>
               Tilbake
             </Button>
-            <Button onClick={createList} isLoading={isCreating} disabled={generatedItems.size === 0}>
-              Opprett liste ({generatedItems.size} varer)
+            <Button onClick={createList} isLoading={isCreating}>
+              {generatedItems.size > 0 ? `Opprett liste (${generatedItems.size} varer)` : 'Opprett tom liste'}
             </Button>
           </div>
         </div>
