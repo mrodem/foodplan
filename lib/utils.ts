@@ -39,6 +39,20 @@ export function getWeekDates(baseDate: Date = new Date()): Date[] {
   return dates;
 }
 
+export function getNextDays(count: number = 7, baseDate: Date = new Date()): Date[] {
+  const dates: Date[] = [];
+  const start = new Date(baseDate);
+  start.setHours(0, 0, 0, 0);
+
+  for (let i = 0; i < count; i++) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + i);
+    dates.push(date);
+  }
+
+  return dates;
+}
+
 export function toDateString(date: Date): string {
   // Use local date components to avoid timezone issues
   const year = date.getFullYear();

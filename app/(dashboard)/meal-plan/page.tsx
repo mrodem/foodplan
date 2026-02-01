@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button, Card, CardContent, Modal, EmptyState } from '@/components/ui';
 import { getWeekDates, toDateString, formatDate } from '@/lib/utils';
@@ -149,15 +148,6 @@ export default function MealPlanPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4"
-      >
-        <svg className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
-        Oversikt
-      </Link>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Ukesmeny</h1>
         <div className="flex items-center gap-2">
@@ -209,8 +199,8 @@ export default function MealPlanPage() {
                     today ? 'bg-green-50' : past ? 'bg-gray-50' : ''
                   }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-20 ${today ? 'text-green-700' : past ? 'text-gray-400' : 'text-gray-600'}`}>
+                  <div className="flex items-center">
+                    <div className={`w-20 shrink-0 ${today ? 'text-green-700' : past ? 'text-gray-400' : 'text-gray-600'}`}>
                       <p className="font-medium">{date.toLocaleDateString('nb-NO', { weekday: 'short' })}</p>
                       <p className="text-sm">{date.toLocaleDateString('nb-NO', { month: 'short', day: 'numeric' })}</p>
                     </div>
@@ -220,11 +210,11 @@ export default function MealPlanPage() {
                           {meal.recipes?.name}
                         </p>
                       ) : (
-                        <p className="text-gray-400 italic">Ingen middag planlagt</p>
+                        <p className="text-gray-400 italic">Ikke planlagt</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     {meal && (
                       <button
                         onClick={() => handleRemoveMeal(meal.id)}
