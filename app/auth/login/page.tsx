@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button, Input, Card, CardContent } from '@/components/ui';
 
@@ -141,13 +140,6 @@ export default function LoginPage() {
           >
             Send innloggingslenke
           </Button>
-
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Har du ikke konto?{' '}
-            <Link href="/auth/signup" className="text-green-600 hover:text-green-700 font-medium">
-              Registrer deg
-            </Link>
-          </p>
         </CardContent>
       </Card>
     </div>

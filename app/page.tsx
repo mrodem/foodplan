@@ -18,20 +18,12 @@ export default async function LandingPage() {
             <LogoIcon className="h-9 w-9 text-green-600 mr-2" />
             <span className="text-2xl font-bold text-green-600">MatPlan</span>
           </div>
-          <div className="flex gap-4">
-            <Link
-              href="/auth/login"
-              className="px-4 py-2 text-green-700 hover:text-green-800 font-medium"
-            >
-              Logg inn
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
-            >
-              Kom i gang
-            </Link>
-          </div>
+          <Link
+            href="/auth/login"
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+          >
+            Logg inn
+          </Link>
         </nav>
 
         <div className="text-center max-w-3xl mx-auto">
@@ -42,10 +34,10 @@ export default async function LandingPage() {
             Planlegg ukens middager og lag handlelister automatisk basert på neste dagers meny.
           </p>
           <Link
-            href="/auth/signup"
+            href="/auth/login"
             className="inline-block px-8 py-4 bg-green-600 text-white text-lg rounded-xl hover:bg-green-700 font-medium shadow-lg hover:shadow-xl transition-all"
           >
-            Start gratis
+            Logg inn
           </Link>
         </div>
 
