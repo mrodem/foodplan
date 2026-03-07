@@ -11,6 +11,10 @@ interface MealPlanWithRecipe extends MealPlan {
   recipes: Recipe & { recipe_ingredients: RecipeIngredient[] };
 }
 
+interface GeneratedItem extends RecipeIngredient {
+  sourceRecipes: string[];
+}
+
 export default function NewShoppingListPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -19,7 +23,7 @@ export default function NewShoppingListPage() {
   const [listName, setListName] = useState('');
   const [mealPlans, setMealPlans] = useState<MealPlanWithRecipe[]>([]);
   const [selectedMeals, setSelectedMeals] = useState<Set<string>>(new Set());
-  const [generatedItems, setGeneratedItems] = useState<Map<string, RecipeIngredient>>(new Map());
+  const [generatedItems, setGeneratedItems] = useState<Map<string, GeneratedItem>>(new Map());
   const [commonItems, setCommonItems] = useState<CommonItem[]>([]);
   const [categoryOrders, setCategoryOrders] = useState<{ category: IngredientCategory; sort_order: number }[]>([]);
   const [householdId, setHouseholdId] = useState<string | null>(null);
@@ -105,7 +109,7 @@ export default function NewShoppingListPage() {
   };
 
   const generateListFromMeals = () => {
-    const items = new Map<string, RecipeIngredient>();
+    const items = new Map<string, GeneratedItem>();
 
     selectedMeals.forEach((mealId) => {
       const meal = mealPlans.find((m) => m.id === mealId);
@@ -122,8 +126,12 @@ export default function NewShoppingListPage() {
             if (!existing.unit && ingredient.unit) {
               existing.unit = ingredient.unit;
             }
+            // Add recipe to source list if not already there
+            if (!existing.sourceRecipes.includes(meal.recipes.name)) {
+              existing.sourceRecipes.push(meal.recipes.name);
+            }
           } else {
-            items.set(key, { ...ingredient, quantity: ingredientQty });
+            items.set(key, { ...ingredient, quantity: ingredientQty, sourceRecipes: [meal.recipes.name] });
           }
         });
       }
@@ -154,6 +162,7 @@ export default function NewShoppingListPage() {
         quantity: itemQty,
         unit: item.default_unit,
         category: item.category,
+        sourceRecipes: [],
       });
     }
     setGeneratedItems(newItems);
@@ -366,9 +375,19 @@ export default function NewShoppingListPage() {
                           key={key}
                           className="flex items-center justify-between py-1 px-2 rounded hover:bg-gray-50"
                         >
-                          <span className="text-gray-900">
-                            {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
-                          </span>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-gray-900">
+                              {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
+                            </span>
+                            {item.sourceRecipes.map((recipe) => (
+                              <span
+                                key={recipe}
+                                className="px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs"
+                              >
+                                {recipe}
+                              </span>
+                            ))}
+                          </div>
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openEditModal(key)}
