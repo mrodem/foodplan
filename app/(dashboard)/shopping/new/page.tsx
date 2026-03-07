@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Button, Input, Card, CardHeader, CardTitle, CardContent, Modal } from '@/components/ui';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { toDateString, formatDate, groupBy } from '@/lib/utils';
-import { CATEGORY_LABELS, DEFAULT_CATEGORIES, type IngredientCategory, type MealPlan, type Recipe, type RecipeIngredient, type CommonItem } from '@/lib/types';
+import { DEFAULT_CATEGORIES, CATEGORY_LABELS, type MealPlan, type Recipe, type RecipeIngredient, type CommonItem } from '@/lib/types';
 
 interface MealPlanWithRecipe extends MealPlan {
   recipes: Recipe & { recipe_ingredients: RecipeIngredient[] };
@@ -19,25 +19,17 @@ export default function NewShoppingListPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [step, setStep] = useState<'meals' | 'review' | 'add'>('meals');
+  const [step, setStep] = useState<'meals' | 'add'>('meals');
   const [listName, setListName] = useState('');
   const [mealPlans, setMealPlans] = useState<MealPlanWithRecipe[]>([]);
   const [selectedMeals, setSelectedMeals] = useState<Set<string>>(new Set());
   const [generatedItems, setGeneratedItems] = useState<Map<string, GeneratedItem>>(new Map());
   const [commonItems, setCommonItems] = useState<CommonItem[]>([]);
-  const [categoryOrders, setCategoryOrders] = useState<{ category: IngredientCategory; sort_order: number }[]>([]);
   const [householdId, setHouseholdId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
 
-  // Edit item modal state
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingItemKey, setEditingItemKey] = useState<string | null>(null);
-  const [editQuantity, setEditQuantity] = useState('');
-  const [editUnit, setEditUnit] = useState('');
-
-  // Get today's date for filtering meal plans
   const today = toDateString(new Date());
 
   useEffect(() => {
@@ -59,7 +51,6 @@ export default function NewShoppingListPage() {
     if (!membership) return;
     setHouseholdId(membership.household_id);
 
-    // Load meal plans for next two weeks
     const { data: plans } = await supabase
       .from('meal_plans')
       .select('*, recipes(*, recipe_ingredients(*))')
@@ -71,7 +62,6 @@ export default function NewShoppingListPage() {
       setMealPlans(plans as MealPlanWithRecipe[]);
     }
 
-    // Load common items
     const { data: items } = await supabase
       .from('common_items')
       .select('*')
@@ -82,18 +72,6 @@ export default function NewShoppingListPage() {
       setCommonItems(items);
     }
 
-    // Load category orders
-    const { data: orders } = await supabase
-      .from('category_orders')
-      .select('category, sort_order')
-      .eq('household_id', membership.household_id)
-      .order('sort_order');
-
-    if (orders) {
-      setCategoryOrders(orders);
-    }
-
-    // Auto-generate list name based on date
     setListName(`Handling ${new Date().toLocaleDateString('nb-NO')}`);
     setLoading(false);
   }
@@ -108,7 +86,7 @@ export default function NewShoppingListPage() {
     setSelectedMeals(newSelected);
   };
 
-  const generateListFromMeals = () => {
+  const buildItemsFromMeals = () => {
     const items = new Map<string, GeneratedItem>();
 
     selectedMeals.forEach((mealId) => {
@@ -120,13 +98,10 @@ export default function NewShoppingListPage() {
 
           if (items.has(key)) {
             const existing = items.get(key)!;
-            const existingQty = existing.quantity ?? 1;
-            existing.quantity = existingQty + ingredientQty;
-            // Keep the unit from the first item, or use the new one if first was empty
+            existing.quantity = (existing.quantity ?? 1) + ingredientQty;
             if (!existing.unit && ingredient.unit) {
               existing.unit = ingredient.unit;
             }
-            // Add recipe to source list if not already there
             if (!existing.sourceRecipes.includes(meal.recipes.name)) {
               existing.sourceRecipes.push(meal.recipes.name);
             }
@@ -137,8 +112,7 @@ export default function NewShoppingListPage() {
       }
     });
 
-    setGeneratedItems(items);
-    setStep('review');
+    return items;
   };
 
   const addCommonItem = (item: CommonItem) => {
@@ -147,10 +121,8 @@ export default function NewShoppingListPage() {
     const itemQty = item.default_quantity ?? 1;
 
     if (newItems.has(key)) {
-      // Aggregate quantities
       const existing = newItems.get(key)!;
-      const existingQty = existing.quantity ?? 1;
-      existing.quantity = existingQty + itemQty;
+      existing.quantity = (existing.quantity ?? 1) + itemQty;
       if (!existing.unit && item.default_unit) {
         existing.unit = item.default_unit;
       }
@@ -174,40 +146,11 @@ export default function NewShoppingListPage() {
     setGeneratedItems(newItems);
   };
 
-  const openEditModal = (key: string) => {
-    const item = generatedItems.get(key);
-    if (item) {
-      setEditingItemKey(key);
-      setEditQuantity(item.quantity?.toString() || '1');
-      setEditUnit(item.unit || '');
-      setShowEditModal(true);
-    }
-  };
-
-  const saveItemEdit = () => {
-    if (!editingItemKey) return;
-
-    const newItems = new Map(generatedItems);
-    const item = newItems.get(editingItemKey);
-    if (item) {
-      item.quantity = editQuantity ? parseFloat(editQuantity) : 1;
-      item.unit = editUnit.trim() || null;
-      newItems.set(editingItemKey, item);
-      setGeneratedItems(newItems);
-    }
-
-    setShowEditModal(false);
-    setEditingItemKey(null);
-    setEditQuantity('');
-    setEditUnit('');
-  };
-
-  const createList = async () => {
+  const createList = async (items: Map<string, GeneratedItem>) => {
     if (!householdId || !userId) return;
 
     setIsCreating(true);
 
-    // Create shopping list
     const { data: list, error: listError } = await supabase
       .from('shopping_lists')
       .insert({
@@ -222,15 +165,15 @@ export default function NewShoppingListPage() {
       return;
     }
 
-    // Add items to list (if any)
-    if (generatedItems.size > 0) {
-      const itemsToInsert = Array.from(generatedItems.values()).map((item) => ({
+    if (items.size > 0) {
+      const itemsToInsert = Array.from(items.values()).map((item) => ({
         list_id: list.id,
         name: item.name,
         quantity: item.quantity,
         unit: item.unit,
         category: item.category,
         added_by: userId,
+        source_recipes: item.sourceRecipes,
       }));
 
       await supabase.from('shopping_list_items').insert(itemsToInsert);
@@ -239,11 +182,6 @@ export default function NewShoppingListPage() {
     router.push(`/shopping/${list.id}`);
   };
 
-  const sortedCategories = categoryOrders.length > 0
-    ? categoryOrders.map((o) => o.category)
-    : DEFAULT_CATEGORIES;
-
-  const groupedItems = groupBy(Array.from(generatedItems.entries()), ([, item]) => item.category);
   const groupedCommonItems = groupBy(commonItems, (item) => item.category);
 
   if (loading) {
@@ -260,26 +198,6 @@ export default function NewShoppingListPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Opprett handleliste</h1>
-
-      {/* Progress indicator */}
-      <div className="flex items-center mb-8">
-        {['meals', 'review', 'add'].map((s, i) => (
-          <div key={s} className="flex items-center">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                step === s
-                  ? 'bg-green-600 text-white'
-                  : i < ['meals', 'review', 'add'].indexOf(step)
-                  ? 'bg-green-100 text-green-600'
-                  : 'bg-gray-200 text-gray-500'
-              }`}
-            >
-              {i + 1}
-            </div>
-            {i < 2 && <div className="w-12 h-0.5 bg-gray-200 mx-2" />}
-          </div>
-        ))}
-      </div>
 
       {step === 'meals' && (
         <div>
@@ -337,96 +255,21 @@ export default function NewShoppingListPage() {
             <Button variant="outline" onClick={() => router.back()}>
               Avbryt
             </Button>
-            <Button
-              onClick={() => {
-                if (selectedMeals.size > 0) {
-                  generateListFromMeals();
-                } else {
-                  setStep('add');
-                }
-              }}
-            >
-              {selectedMeals.size > 0 ? `Generer fra ${selectedMeals.size} middag(er)` : 'Hopp til legg til varer'}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {step === 'review' && (
-        <div>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Se over generert liste</CardTitle>
-              <p className="text-sm text-gray-500 mt-1">
-                Du kan legge til flere varer etter at handlelisten er opprettet.
-              </p>
-            </CardHeader>
-            <CardContent>
-              {sortedCategories.map((category) => {
-                const categoryItems = groupedItems[category];
-                if (!categoryItems || categoryItems.length === 0) return null;
-
-                return (
-                  <div key={category} className="mb-4 last:mb-0">
-                    <h4 className="font-medium text-gray-700 mb-2">{CATEGORY_LABELS[category]}</h4>
-                    <div className="space-y-1">
-                      {categoryItems.map(([key, item]) => (
-                        <div
-                          key={key}
-                          className="flex items-center justify-between py-1 px-2 rounded hover:bg-gray-50"
-                        >
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-gray-900">
-                              {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
-                            </span>
-                            {item.sourceRecipes.map((recipe) => (
-                              <span
-                                key={recipe}
-                                className="px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs"
-                              >
-                                {recipe}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => openEditModal(key)}
-                              className="text-gray-400 hover:text-blue-500 p-1"
-                              title="Rediger"
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => removeItem(key)}
-                              className="text-gray-400 hover:text-red-500 p-1"
-                              title="Fjern"
-                            >
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-              {generatedItems.size === 0 && (
-                <p className="text-gray-500 text-center py-4">Ingen varer ennå</p>
-              )}
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep('meals')}>
-              Tilbake
-            </Button>
-            <Button onClick={createList} isLoading={isCreating}>
-              Opprett liste
-            </Button>
+            {selectedMeals.size > 0 ? (
+              <Button
+                onClick={() => {
+                  const items = buildItemsFromMeals();
+                  createList(items);
+                }}
+                isLoading={isCreating}
+              >
+                {`Opprett liste fra ${selectedMeals.size} middag(er)`}
+              </Button>
+            ) : (
+              <Button onClick={() => setStep('add')}>
+                Legg til varer manuelt
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -438,7 +281,7 @@ export default function NewShoppingListPage() {
               <CardTitle>Legg til varer per kategori</CardTitle>
             </CardHeader>
             <CardContent>
-              {sortedCategories.map((category) => {
+              {DEFAULT_CATEGORIES.map((category) => {
                 const categoryCommonItems = groupedCommonItems[category];
                 if (!categoryCommonItems || categoryCommonItems.length === 0) return null;
 
@@ -490,17 +333,11 @@ export default function NewShoppingListPage() {
               <CardContent className="p-0">
                 <div className="max-h-48 overflow-y-auto px-6 py-3">
                   {Array.from(generatedItems.entries()).map(([key, item]) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between py-1"
-                    >
+                    <div key={key} className="flex items-center justify-between py-1">
                       <span className="text-gray-900 text-sm">
                         {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
                       </span>
-                      <button
-                        onClick={() => removeItem(key)}
-                        className="text-gray-400 hover:text-red-500"
-                      >
+                      <button onClick={() => removeItem(key)} className="text-gray-400 hover:text-red-500">
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -513,53 +350,15 @@ export default function NewShoppingListPage() {
           )}
 
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(selectedMeals.size > 0 ? 'review' : 'meals')}>
+            <Button variant="outline" onClick={() => setStep('meals')}>
               Tilbake
             </Button>
-            <Button onClick={createList} isLoading={isCreating}>
+            <Button onClick={() => createList(generatedItems)} isLoading={isCreating}>
               {generatedItems.size > 0 ? `Opprett liste (${generatedItems.size} varer)` : 'Opprett tom liste'}
             </Button>
           </div>
         </div>
       )}
-
-      {/* Edit Item Modal */}
-      <Modal
-        isOpen={showEditModal}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditingItemKey(null);
-        }}
-        title={`Rediger ${editingItemKey ? generatedItems.get(editingItemKey)?.name : ''}`}
-      >
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label="Antall"
-              type="number"
-              step="0.1"
-              min="0.1"
-              value={editQuantity}
-              onChange={(e) => setEditQuantity(e.target.value)}
-              placeholder="1"
-            />
-            <Input
-              label="Enhet (valgfritt)"
-              value={editUnit}
-              onChange={(e) => setEditUnit(e.target.value)}
-              placeholder="stk, kg, l..."
-            />
-          </div>
-          <div className="flex gap-3 justify-end pt-2">
-            <Button variant="outline" onClick={() => setShowEditModal(false)}>
-              Avbryt
-            </Button>
-            <Button onClick={saveItemEdit}>
-              Lagre
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

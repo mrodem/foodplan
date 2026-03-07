@@ -586,9 +586,19 @@ export default function ShoppingListDetailPage() {
                         key={item.id}
                         className="flex items-center px-6 py-3"
                       >
-                        <span className="flex-1 text-gray-900">
-                          {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
-                        </span>
+                        <div className="flex-1 flex items-center gap-2 flex-wrap">
+                          <span className="text-gray-900">
+                            {item.quantity ?? 1}{item.unit ? ` ${item.unit}` : ''} {item.name}
+                          </span>
+                          {item.source_recipes?.map((recipe) => (
+                            <span
+                              key={recipe}
+                              className="px-2 py-0.5 bg-green-50 text-green-700 rounded text-xs"
+                            >
+                              {recipe}
+                            </span>
+                          ))}
+                        </div>
                         {!isCompleted && (
                           <div className="flex items-center gap-1">
                             <button

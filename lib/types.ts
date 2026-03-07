@@ -83,6 +83,7 @@ export interface ShoppingListItem {
   is_purchased: boolean;
   added_by: string;
   created_at: string;
+  source_recipes: string[];
 }
 
 export interface CategoryOrder {
